@@ -1,0 +1,17 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type PostType {
+  content: String!
+  created_by: String!
+}
+
+type UserType {
+  email: String!
+}
+
+type Query {
+  users: [UserType!]!
+  post: [PostType!]!
+}
