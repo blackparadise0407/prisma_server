@@ -9,14 +9,11 @@ export class RefreshToken {
 	@Prop({ required: true, unique: true })
 	value: string;
 
-	@Prop({ required: true, type: MongooseSchema.Types.ObjectId, ref: 'User' })
+	@Prop({ type: MongooseSchema.Types.ObjectId, required: true, ref: 'User' })
 	user: User;
 
-	@Prop({ required: true })
+	@Prop()
 	ipAddress: string;
-
-	@Prop({ required: true })
-	expiredAt: Date;
 }
 
 export const RefreshTokenSchema = SchemaFactory.createForClass(RefreshToken);

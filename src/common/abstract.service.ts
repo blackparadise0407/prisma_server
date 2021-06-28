@@ -1,19 +1,21 @@
 import { InternalServerErrorException } from '@nestjs/common';
-import { Document, Model, Types } from 'mongoose';
+import { Document, FilterQuery, Model, Types } from 'mongoose';
 import { LoggerService } from 'src/logger/logger.service';
-import { CreateUserDTO } from 'src/user/dto/create-user.dto';
 
 export abstract class AbstractService<T extends Document> {
 	private readonly _model: Model<T>;
 	private readonly serviceLogger: LoggerService;
 
-	constructor(logger: LoggerService, model?: Model<T>) {
-		this._model = model;
-		this.serviceLogger = logger;
+	constructor(model?: Model<T>) {
+		if (model) {
+			this._model = model;
+			this.serviceLogger = new LoggerService(model.collection.name, true);
+		}
 	}
 
-	async findAll(filter = {}): Promise<T[]> {
+	async findAll(filter: FilterQuery<T> = {}): Promise<T[]> {
 		try {
+			this.serviceLogger.log('OK');
 			return this._model.find(filter).exec();
 		} catch (e) {
 			this.serviceLogger.error(e);
@@ -30,18 +32,18 @@ export abstract class AbstractService<T extends Document> {
 		}
 	}
 
-	async create(payload: CreateUserDTO): Promise<T> {
+	async create(payload: T): Promise<T> {
 		try {
-			const user = new this._model(payload);
-			await user.save();
-			return user;
+			const record = new this._model(payload);
+			await record.save();
+			return record;
 		} catch (e) {
 			this.serviceLogger.error(e);
 			throw new InternalServerErrorException();
 		}
 	}
 
-	async findOne(filter = {}): Promise<T> {
+	async findOne(filter: FilterQuery<T>): Promise<T> {
 		try {
 			return this._model.findOne(filter);
 		} catch (e) {
