@@ -8,7 +8,7 @@ import configuration from './config/configuration';
 import { AppLoggerMiddleware } from './middlewares/logger.middleware';
 import { PostModule } from './post/post.module';
 import { UserModule } from './user/user.module';
-import { RefreshTokenModule } from './refresh-token/refresh-token.module';
+
 import { AuthModule } from './auth/auth.module';
 import { LoggerModule } from './logger/logger.module';
 
@@ -38,12 +38,12 @@ import { LoggerModule } from './logger/logger.module';
 				useNewUrlParser: true,
 				useFindAndModify: false,
 				useUnifiedTopology: true,
+				useCreateIndex: true,
 			}),
 			inject: [ConfigService],
 		}),
 		UserModule,
 		PostModule,
-		RefreshTokenModule,
 		AuthModule,
 		LoggerModule,
 	],
@@ -51,6 +51,12 @@ import { LoggerModule } from './logger/logger.module';
 	providers: [AppService],
 })
 export class AppModule implements NestModule {
+	static isDev: boolean;
+	static port: number;
+	constructor(private readonly configService: ConfigService) {
+		AppModule.port = this.configService.get<number>('port');
+		AppModule.isDev = process.env.NODE_ENV === 'development';
+	}
 	configure(consumer: MiddlewareConsumer): void {
 		consumer.apply(AppLoggerMiddleware).forRoutes('*');
 	}

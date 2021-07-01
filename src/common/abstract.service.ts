@@ -9,7 +9,12 @@ export abstract class AbstractService<T extends Document> {
 	constructor(model?: Model<T>) {
 		if (model) {
 			this._model = model;
-			this.serviceLogger = new LoggerService(model.collection.name, true);
+			const _collectionName = model.collection.name;
+
+			this.serviceLogger = new LoggerService(
+				_collectionName.charAt(0).toUpperCase() + _collectionName.slice(1),
+				true,
+			);
 		}
 	}
 

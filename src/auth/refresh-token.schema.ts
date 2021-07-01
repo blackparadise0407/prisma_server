@@ -14,6 +14,9 @@ export class RefreshToken {
 
 	@Prop()
 	ipAddress: string;
+
+	@Prop({ required: true })
+	expiredAt: Date;
 }
 
 export const RefreshTokenSchema = SchemaFactory.createForClass(RefreshToken);
