@@ -23,20 +23,19 @@ async function bootstrap() {
 		origin: process.env.CORS_ORIGIN,
 	});
 
+	app.setGlobalPrefix(globalPrefix);
+
 	if (AppModule.isDev) {
 		const config = new DocumentBuilder()
 			.setTitle('Prisma example')
 			.setDescription('The Prisma API description')
 			.setVersion('1.0')
 			.addTag('prisma')
-			.setBasePath(globalPrefix)
 			.build();
 
 		const document = SwaggerModule.createDocument(app, config);
 		SwaggerModule.setup(`${globalPrefix}/docs`, app, document);
 	}
-
-	app.setGlobalPrefix(globalPrefix);
 
 	// Validate query params and body
 	app.useGlobalPipes(new ValidationPipe({ transform: true }));
@@ -51,7 +50,7 @@ async function bootstrap() {
 	logger.log(`Listening to http://${baseUrl}:${AppModule.port}${globalPrefix}`);
 	if (AppModule.isDev) {
 		logger.log(
-			`Swagger UI: http://${baseUrl}:${AppModule.port}${globalPrefix}/swagger`,
+			`Swagger UI: http://${baseUrl}:${AppModule.port}${globalPrefix}/docs`,
 		);
 	}
 }

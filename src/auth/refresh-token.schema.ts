@@ -1,6 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document, Schema as MongooseSchema } from 'mongoose';
-import { User } from 'src/user/user.schema';
+import { Document, Types, SchemaTypes } from 'mongoose';
 
 export type RefreshTokenDocument = RefreshToken & Document;
 
@@ -9,8 +8,8 @@ export class RefreshToken {
 	@Prop({ required: true, unique: true })
 	value: string;
 
-	@Prop({ type: MongooseSchema.Types.ObjectId, required: true, ref: 'User' })
-	user: User;
+	@Prop({ type: SchemaTypes.ObjectId, required: true, ref: 'User' })
+	user: Types.ObjectId;
 
 	@Prop()
 	ipAddress: string;

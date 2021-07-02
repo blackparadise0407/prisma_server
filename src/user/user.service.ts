@@ -3,6 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { AbstractService } from 'src/common/abstract.service';
 import { User, UserDocument } from './user.schema';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UserService extends AbstractService<UserDocument> {
@@ -10,7 +11,11 @@ export class UserService extends AbstractService<UserDocument> {
 		super(userModel);
 	}
 
-	async findByPhoneNumber(phoneNumber: string): Promise<User> {
+	async findByPhoneNumber(phoneNumber: string): Promise<UserDocument> {
 		return await this.userModel.findOne({ phoneNumber });
+	}
+
+	async comparePassword(str: string, hashed: string): Promise<boolean> {
+		return await bcrypt.compare(str, hashed);
 	}
 }

@@ -47,10 +47,12 @@ import { UserService } from './user.service';
 
 					schema.set('toJSON', {
 						transform: (_user: UserDocument, ret: { [key: string]: any }) => {
+							ret.id = ret._id;
 							delete ret.password;
-							// for (const v in ret) {
-							// 	if (!ret[v]) delete ret[v];
-							// }
+							delete ret._id;
+							for (const v in ret) {
+								if (!ret[v]) delete ret[v];
+							}
 						},
 					});
 					return schema;

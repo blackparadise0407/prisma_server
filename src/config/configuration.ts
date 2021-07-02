@@ -13,10 +13,10 @@ export default () => ({
 		access: {
 			ttl: parseInt(process.env.ACCESS_TOKEN_TTL, 10) || 60 * 5, // 15 mins
 			secret: process.env.ACCESS_TOKEN_SECRET || 'access',
+			algorithm: 'HS256',
 		},
 		refresh: {
 			ttl: parseInt(process.env.REFRESH_TOKEN_TTL, 10) || 60 * 60 * 30, // 30 days
-			secret: process.env.REFRESH_TOKEN_SECRET || 'refresh',
 		},
 	},
 });

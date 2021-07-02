@@ -12,20 +12,14 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 		private readonly configService: ConfigService,
 	) {
 		super({
-			jwtFromRequest: ExtractJwt.fromExtractors([
-				ExtractJwt.fromAuthHeaderAsBearerToken(),
-				ExtractJwt.fromUrlQueryParameter('access_token'),
-			]),
+			jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+			ignoreExpiration: false,
 			secretOrKey: configService.get<string>('jwt.access.secret'),
 			passReqToCallback: true,
 		});
 	}
 
-	// async validate(payload: JwtPayload) {
-	// 	const result = await this.tokenService.validatePayload(payload);
-	// 	if (!result) {
-	// 		throw new UnauthorizedException();
-	// 	}
-	// 	return result;
-	// }
+	async validate(payload: JwtPayload) {
+		return { id: payload.sub };
+	}
 }

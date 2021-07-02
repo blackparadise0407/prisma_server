@@ -6,7 +6,21 @@ import { PostService } from './post.service';
 
 @Module({
 	imports: [
-		MongooseModule.forFeature([{ name: Post.name, schema: PostSchema }]),
+		MongooseModule.forFeatureAsync([
+			{
+				name: Post.name,
+				useFactory: () => {
+					const schema = PostSchema;
+					schema.set('toJSON', {
+						transform: (_, ret: { [key: string]: any }) => {
+							ret.id = ret._id;
+							delete ret._id;
+						},
+					});
+					return schema;
+				},
+			},
+		]),
 	],
 	controllers: [],
 	providers: [PostResolver, PostService],

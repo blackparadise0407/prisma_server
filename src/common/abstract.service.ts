@@ -37,7 +37,7 @@ export abstract class AbstractService<T extends Document> {
 		}
 	}
 
-	async create(payload: T): Promise<T> {
+	async create(payload: any): Promise<T> {
 		try {
 			const record = new this._model(payload);
 			await record.save();
@@ -57,9 +57,9 @@ export abstract class AbstractService<T extends Document> {
 		}
 	}
 
-	async deleteById(id: string): Promise<T> {
+	async delete(filter: FilterQuery<T>): Promise<T> {
 		try {
-			return this._model.findByIdAndDelete(Types.ObjectId(id));
+			return this._model.findOneAndDelete(filter);
 		} catch (e) {
 			this.serviceLogger.error(e);
 			throw new InternalServerErrorException();

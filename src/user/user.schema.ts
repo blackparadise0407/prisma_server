@@ -6,7 +6,7 @@ const UserStatusEnum: UserStatus[] = ['VERIFIED', 'PENDING', 'DEACTIVATED'];
 
 export type UserDocument = User & Document;
 
-@Schema()
+@Schema({ versionKey: false, timestamps: true })
 export class User {
 	@Prop()
 	firstName: string;

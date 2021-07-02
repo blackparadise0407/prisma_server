@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { LoggerModule } from 'src/logger/logger.module';
@@ -12,12 +12,24 @@ import { TokenService } from './token/token.service';
 
 @Module({
 	imports: [
-		UserModule,
 		LoggerModule,
-		MongooseModule.forFeature([
-			{ name: RefreshToken.name, schema: RefreshTokenSchema },
+		MongooseModule.forFeatureAsync([
+			{
+				name: RefreshToken.name,
+				useFactory: () => {
+					const schema = RefreshTokenSchema;
+					schema.set('toJSON', {
+						transform: (_, ret: { [key: string]: any }) => {
+							ret.id = ret._id;
+							delete ret._id;
+						},
+					});
+					return schema;
+				},
+			},
 		]),
 		ConfigModule,
+		UserModule,
 	],
 	controllers: [AuthController],
 	providers: [
