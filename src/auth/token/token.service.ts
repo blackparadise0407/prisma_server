@@ -12,7 +12,7 @@ import * as moment from 'moment';
 import { Model, Types } from 'mongoose';
 import { AbstractService } from 'src/common/abstract.service';
 import { JwtPayload } from '../jwt-payload';
-import { RefreshToken, RefreshTokenDocument } from '../refresh-token.schema';
+import { RefreshToken, RefreshTokenDocument } from './refresh-token.schema';
 
 @Injectable()
 export class TokenService extends AbstractService<RefreshTokenDocument> {
@@ -66,7 +66,7 @@ export class TokenService extends AbstractService<RefreshTokenDocument> {
 		const { userId, ipAddress } = tokenContent;
 		const secret = randomBytes(64).toString('hex');
 		const token: RefreshToken = {
-			user: Types.ObjectId(userId),
+			userId: Types.ObjectId(userId),
 			value: secret,
 			ipAddress,
 			expiredAt: moment()
@@ -98,7 +98,7 @@ export class TokenService extends AbstractService<RefreshTokenDocument> {
 		return accessToken;
 	}
 
-	async deleteRefreshTokenForUser(userId: string) {
+	async revokeTokenForUser(userId: string) {
 		await this.delete({ _id: Types.ObjectId(userId) });
 	}
 }

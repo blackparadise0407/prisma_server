@@ -1,9 +1,14 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import * as bcrypt from 'bcrypt';
+import { AuthModule } from 'src/auth/auth.module';
+import { ConfirmationService } from 'src/auth/confirmation/confirmation.service';
+import { TokenService } from 'src/auth/token/token.service';
 import { LoggerModule } from 'src/logger/logger.module';
 import { LoggerService } from 'src/logger/logger.service';
+import { MailModule } from 'src/mail/mail.module';
+import { MailService } from 'src/mail/mail.service';
 import { UserController } from './user.controller';
 import { UserResolver } from './user.resolver';
 import { User, UserDocument, UserSchema } from './user.schema';
@@ -60,8 +65,17 @@ import { UserService } from './user.service';
 			},
 		]),
 		LoggerModule,
+		MailModule,
+		ConfigModule,
+		forwardRef(() => AuthModule),
 	],
-	providers: [UserResolver, UserService, LoggerService],
+	providers: [
+		UserResolver,
+		UserService,
+		LoggerService,
+		MailService,
+		ConfigService,
+	],
 	exports: [UserService],
 	controllers: [UserController],
 })

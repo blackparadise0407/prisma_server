@@ -2,13 +2,13 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+type UserType {
+  email: String!
+}
+
 type PostType {
   content: String!
   created_by: String!
-}
-
-type UserType {
-  email: String!
 }
 
 type Query {

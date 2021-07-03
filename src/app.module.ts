@@ -4,13 +4,13 @@ import { GraphQLModule } from '@nestjs/graphql';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { AuthModule } from './auth/auth.module';
 import configuration from './config/configuration';
-import { AppLoggerMiddleware } from './middlewares/logger.middleware';
+import { LoggerModule } from './logger/logger.module';
+import { MailModule } from './mail/mail.module';
+import { AppLoggerMiddleware } from './common/middlewares/logger.middleware';
 import { PostModule } from './post/post.module';
 import { UserModule } from './user/user.module';
-
-import { AuthModule } from './auth/auth.module';
-import { LoggerModule } from './logger/logger.module';
 
 @Module({
 	imports: [
@@ -46,6 +46,7 @@ import { LoggerModule } from './logger/logger.module';
 		PostModule,
 		AuthModule,
 		LoggerModule,
+		MailModule,
 	],
 	controllers: [AppController],
 	providers: [AppService],

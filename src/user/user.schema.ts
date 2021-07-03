@@ -8,11 +8,11 @@ export type UserDocument = User & Document;
 
 @Schema({ versionKey: false, timestamps: true })
 export class User {
-	@Prop()
-	firstName: string;
+	@Prop({ index: true })
+	username: string;
 
-	@Prop()
-	lastName: string;
+	@Prop({ index: true })
+	email: string;
 
 	@Prop()
 	password: string;
@@ -24,10 +24,7 @@ export class User {
 	facebookId: string;
 
 	@Prop({ required: true, default: 'PENDING', enum: [...UserStatusEnum] })
-	status: string;
-
-	@Prop()
-	phoneNumber: string;
+	status: UserStatus;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

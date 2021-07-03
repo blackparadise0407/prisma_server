@@ -9,7 +9,7 @@ export class RefreshToken {
 	value: string;
 
 	@Prop({ type: SchemaTypes.ObjectId, required: true, ref: 'User' })
-	user: Types.ObjectId;
+	userId: Types.ObjectId;
 
 	@Prop()
 	ipAddress: string;

@@ -1,19 +1,18 @@
-import { IsDefined, IsNotEmpty } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
+import { IsDefined, IsEmail, IsNotEmpty } from 'class-validator';
 
 export class RegisterInputDTO {
 	@IsDefined()
 	@IsNotEmpty()
-	readonly firstName: string;
+	readonly username: string;
 
 	@IsDefined()
 	@IsNotEmpty()
-	lastName: string;
+	@IsEmail({}, { message: 'Invalid email address' })
+	@ApiProperty()
+	readonly email: string;
 
 	@IsDefined()
 	@IsNotEmpty()
-	phoneNumber: string;
-
-	@IsDefined()
-	@IsNotEmpty()
-	password: string;
+	readonly password: string;
 }

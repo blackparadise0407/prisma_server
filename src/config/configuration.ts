@@ -11,7 +11,7 @@ export default () => ({
 	},
 	jwt: {
 		access: {
-			ttl: parseInt(process.env.ACCESS_TOKEN_TTL, 10) || 60 * 5, // 15 mins
+			ttl: parseInt(process.env.ACCESS_TOKEN_TTL, 10) || 60 * 5, // 5 mins
 			secret: process.env.ACCESS_TOKEN_SECRET || 'access',
 			algorithm: 'HS256',
 		},
@@ -19,4 +19,13 @@ export default () => ({
 			ttl: parseInt(process.env.REFRESH_TOKEN_TTL, 10) || 60 * 60 * 30, // 30 days
 		},
 	},
+	gmail: {
+		username: process.env.GMAIL_USERNAME,
+		password: process.env.GMAIL_PASSWORD,
+	},
+	confirmation: {
+		ttl: 60 * 15, // 15 mins
+	},
+	host: process.env.HOST,
+	client: process.env.CLIENT,
 });

@@ -1,5 +1,5 @@
 import { InternalServerErrorException } from '@nestjs/common';
-import { Document, FilterQuery, Model, Types } from 'mongoose';
+import { Document, FilterQuery, Model, Types, UpdateQuery } from 'mongoose';
 import { LoggerService } from 'src/logger/logger.service';
 
 export abstract class AbstractService<T extends Document> {
@@ -51,6 +51,18 @@ export abstract class AbstractService<T extends Document> {
 	async findOne(filter: FilterQuery<T>): Promise<T> {
 		try {
 			return this._model.findOne(filter);
+		} catch (e) {
+			this.serviceLogger.error(e);
+			throw new InternalServerErrorException();
+		}
+	}
+
+	async findOneAndUpdate(
+		filter: FilterQuery<T>,
+		update: UpdateQuery<T>,
+	): Promise<T> {
+		try {
+			return this._model.findOneAndUpdate(filter, update, { new: true });
 		} catch (e) {
 			this.serviceLogger.error(e);
 			throw new InternalServerErrorException();
