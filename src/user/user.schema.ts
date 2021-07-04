@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
+import { EnumToArray } from 'src/utils/enum-to-array';
 import { UserStatus } from './user.interface';
 
 const UserStatusEnum: UserStatus[] = ['VERIFIED', 'PENDING', 'DEACTIVATED'];
@@ -23,7 +24,14 @@ export class User {
 	@Prop()
 	facebookId: string;
 
-	@Prop({ required: true, default: 'PENDING', enum: [...UserStatusEnum] })
+	@Prop()
+	avatar: string;
+
+	@Prop({
+		required: true,
+		default: 'PENDING',
+		enum: [...EnumToArray(UserStatusEnum)],
+	})
 	status: UserStatus;
 }
 

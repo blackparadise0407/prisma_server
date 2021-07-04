@@ -37,7 +37,10 @@ export class UserController {
 	@ApiOperation({ summary: 'Register' })
 	@ApiResponse({ status: HttpStatus.OK })
 	@ApiResponse({ status: HttpStatus.BAD_REQUEST, type: BadRequestException })
-	async register(@Ip() ip: string, @Body() body: CreateUserDTO): Promise<any> {
+	async register(
+		@Ip() ip: string,
+		@Body() body: CreateUserDTO,
+	): Promise<GeneralResponse> {
 		const { email } = body;
 		const existingUser = await this.userService.findOne({ email });
 		if (existingUser) {
@@ -51,3 +54,11 @@ export class UserController {
 		return new GeneralResponse({});
 	}
 }
+
+//google response
+// email: "blackparadise0407@gmail.com"
+// familyName: "Pham"
+// givenName: "Khoa"
+// googleId: "108315643119680032945"
+// imageUrl: "https://lh3.googleusercontent.com/a-/AOh14Gjl11noqb1bn_FDqnnQK4jRspTRWoQlDEZDIodLAw=s96-c"
+// name: "Khoa Pham"

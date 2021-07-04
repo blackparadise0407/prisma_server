@@ -26,4 +26,22 @@ export class MailService {
 			},
 		});
 	}
+
+	async sendUserForgetPassword(user: User, code: string) {
+		const url = AppModule.isDev
+			? this.configService.get('host') + '/api/auth/reset?code=' + code
+			: `${this.configService.get('host')}:${this.configService.get('post')}` +
+			  '/api/auth/reset?code=' +
+			  code;
+
+		await this.mailerService.sendMail({
+			to: user.email,
+			subject: 'Reset password',
+			template: './forget-password',
+			context: {
+				url,
+				name: user.username,
+			},
+		});
+	}
 }

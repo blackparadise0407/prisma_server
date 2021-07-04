@@ -26,6 +26,9 @@ export default () => ({
 	confirmation: {
 		ttl: 60 * 15, // 15 mins
 	},
+	reset_password: {
+		ttl: 60 * 15,
+	},
 	host: process.env.HOST,
 	client: process.env.CLIENT,
 });

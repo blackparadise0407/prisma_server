@@ -22,6 +22,19 @@ export class ConfirmationService extends AbstractService<ConfirmationDocument> {
 			.add(this.configService.get<number>('confirmation.ttl'), 's')
 			.toDate();
 		payload.code = randomBytes(16).toString('hex');
+		payload.type = 'CONFIRMATION';
+		const confirmation = await this.create(payload);
+		return confirmation.code;
+	}
+
+	async createResetPasswordCode(
+		payload: ConfirmationInputDTO,
+	): Promise<string> {
+		payload.expiredAt = moment()
+			.add(this.configService.get<number>('confirmation.ttl'), 's')
+			.toDate();
+		payload.code = randomBytes(16).toString('hex');
+		payload.type = 'FORGET_PASSWORD';
 		const confirmation = await this.create(payload);
 		return confirmation.code;
 	}

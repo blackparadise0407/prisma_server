@@ -16,6 +16,11 @@ import {
 	Confirmation,
 	ConfirmationSchema,
 } from './confirmation/confirmation.schema';
+import {
+	ResetPassword,
+	ResetPasswordSchema,
+} from './reset-password/reset-password.schema';
+import { ResetPasswordService } from './reset-password/reset-password.service';
 
 @Module({
 	imports: [
@@ -47,6 +52,19 @@ import {
 					return schema;
 				},
 			},
+			{
+				name: ResetPassword.name,
+				useFactory: () => {
+					const schema = ResetPasswordSchema;
+					schema.set('toJSON', {
+						transform: (_, ret: { [key: string]: any }) => {
+							ret.id = ret._id;
+							delete ret._id;
+						},
+					});
+					return schema;
+				},
+			},
 		]),
 		ConfigModule,
 		MailModule,
@@ -61,6 +79,7 @@ import {
 		JwtStrategy,
 		MailService,
 		ConfirmationService,
+		ResetPasswordService,
 	],
 	exports: [AuthService, TokenService, ConfirmationService],
 })

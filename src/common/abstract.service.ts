@@ -77,4 +77,13 @@ export abstract class AbstractService<T extends Document> {
 			throw new InternalServerErrorException();
 		}
 	}
+
+	async deleteById(id: string | Types.ObjectId): Promise<void> {
+		try {
+			this._model.findByIdAndDelete(id);
+		} catch (e) {
+			this.serviceLogger.error(e);
+			throw new InternalServerErrorException();
+		}
+	}
 }

@@ -88,6 +88,7 @@ export class TokenService extends AbstractService<RefreshTokenDocument> {
 			throw new NotFoundException('Refresh token not found');
 		}
 		if (existingToken.expiredAt < currentDate) {
+			this.delete({ _id: Types.ObjectId(existingToken._id) });
 			throw new BadRequestException('Refresh token already expired');
 		}
 		const oldPayload = await this.validateToken(oldAccessToken, false, true);
