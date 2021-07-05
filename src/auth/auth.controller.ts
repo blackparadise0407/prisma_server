@@ -21,11 +21,13 @@ import {
 import * as bluebird from 'bluebird';
 import { Response } from 'express';
 import { filter } from 'lodash';
+import { CachingService } from 'src/caching/caching.service';
 import { User } from 'src/common/decorators/user.decorator';
 import { GeneralResponse } from 'src/common/responses/general-response';
 import { MailService } from 'src/mail/mail.service';
 import { UserService } from 'src/user/user.service';
 import { AuthService } from './auth.service';
+import { IConfirmation } from './confirmation/confirmation.interface';
 import { ConfirmationService } from './confirmation/confirmation.service';
 import { GoogleLoginDTO, LoginInputDTO } from './dto/login-input.dto';
 import { CreateNewPasswordDTO, ResetPasswordDTO } from './dto/reset-input.dto';
@@ -43,6 +45,7 @@ export class AuthController {
 		private readonly confirmationService: ConfirmationService,
 		private readonly configService: ConfigService,
 		private readonly resetPasswordService: ResetPasswordService,
+		private readonly cachingService: CachingService,
 	) {}
 
 	@Post('login')
@@ -109,16 +112,16 @@ export class AuthController {
 	@ApiResponse({ status: HttpStatus.BAD_REQUEST, type: BadRequestException })
 	async confirm(@Query() query: { code: string }, @Res() res: Response) {
 		const { code } = query;
-		const confirmation = await this.confirmationService.findOne({ code });
-
+		const confirmation = await this.cachingService.get<IConfirmation>(code);
 		if (!confirmation) {
-			throw new BadRequestException(
-				'Confirmation link is invalid or you has already confirm your account',
-			);
-		}
+			// const confirmation = await this.confirmationService.findOne({ code });
 
-		const currentDate = new Date();
-		if (confirmation.expiredAt < currentDate) {
+			// if (!confirmation) {
+			// 	throw new BadRequestException(
+			// 		'Confirmation link is invalid or you has already confirm your account',
+			// 	);
+			// }
+
 			const user = await this.userService.findById(
 				confirmation.userId.toString(),
 			);
@@ -132,9 +135,9 @@ export class AuthController {
 				throw new BadRequestException('You has already confirm your account');
 			}
 
-			const code = await this.confirmationService.createConfirmationCode({
-				userId: user._id,
-			});
+			const code = await this.confirmationService.createConfirmationCode(
+				user._id.toString(),
+			);
 			await this.mailService.sendUserConfirmation(user, code);
 			res.send(
 				new GeneralResponse({
@@ -148,7 +151,7 @@ export class AuthController {
 				{ status: 'VERIFIED' },
 			);
 
-			await this.confirmationService.delete({ _id: confirmation._id });
+			await this.cachingService.delete(code);
 			const redirectUrl = this.configService.get('client') + '/login';
 			res.redirect(redirectUrl);
 		}
@@ -174,9 +177,9 @@ export class AuthController {
 
 		if (!existingUser) {
 			const user = await this.userService.create(body);
-			const code = await this.confirmationService.createConfirmationCode({
-				userId: user._id,
-			});
+			const code = await this.confirmationService.createConfirmationCode(
+				user._id.toString(),
+			);
 			await this.mailService.sendUserConfirmation(user, code);
 			return new GeneralResponse({});
 		}

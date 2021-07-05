@@ -1,28 +1,26 @@
-import { CacheModule, forwardRef, Module } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { forwardRef, Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
+import { CachingModule } from 'src/caching/caching.module';
 import { LoggerModule } from 'src/logger/logger.module';
-import { LoggerService } from 'src/logger/logger.service';
 import { MailModule } from 'src/mail/mail.module';
 import { MailService } from 'src/mail/mail.service';
 import { UserModule } from 'src/user/user.module';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
-import { RefreshToken, RefreshTokenSchema } from './token/refresh-token.schema';
-import { JwtStrategy } from './strategies/jwt-strategy';
-import { TokenService } from './token/token.service';
-import { ConfirmationService } from './confirmation/confirmation.service';
 import {
 	Confirmation,
 	ConfirmationSchema,
 } from './confirmation/confirmation.schema';
+import { ConfirmationService } from './confirmation/confirmation.service';
 import {
 	ResetPassword,
 	ResetPasswordSchema,
 } from './reset-password/reset-password.schema';
 import { ResetPasswordService } from './reset-password/reset-password.service';
-import { CachingModule } from 'src/caching/caching.module';
-import { CachingService } from 'src/caching/caching.service';
+import { JwtStrategy } from './strategies/jwt-strategy';
+import { RefreshToken, RefreshTokenSchema } from './token/refresh-token.schema';
+import { TokenService } from './token/token.service';
 
 @Module({
 	imports: [
@@ -76,14 +74,14 @@ import { CachingService } from 'src/caching/caching.service';
 	controllers: [AuthController],
 	providers: [
 		AuthService,
-		ConfigService,
-		LoggerService,
+		// ConfigService,
+		// LoggerService,
 		TokenService,
 		JwtStrategy,
 		MailService,
 		ConfirmationService,
 		ResetPasswordService,
-		CachingService,
+		// CachingService,
 	],
 	exports: [AuthService, TokenService, ConfirmationService],
 })
