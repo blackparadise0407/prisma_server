@@ -3,6 +3,7 @@ import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as helmet from 'helmet';
 import { AppModule } from './app.module';
+import { SnakeCaseInterceptor } from './common/interceptors/snake-case.interceptor';
 
 async function bootstrap() {
 	const app = await NestFactory.create(AppModule, {
@@ -39,6 +40,9 @@ async function bootstrap() {
 
 	// Validate query params and body
 	app.useGlobalPipes(new ValidationPipe({ transform: true }));
+
+	// Convert all JSON object keys to snake_case
+	app.useGlobalInterceptors(new SnakeCaseInterceptor());
 
 	await app.listen(AppModule.port);
 

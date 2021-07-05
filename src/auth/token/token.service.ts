@@ -100,6 +100,6 @@ export class TokenService extends AbstractService<RefreshTokenDocument> {
 	}
 
 	async revokeTokenForUser(userId: string) {
-		await this.delete({ _id: Types.ObjectId(userId) });
+		await this.delete({ userId: Types.ObjectId(userId) });
 	}
 }

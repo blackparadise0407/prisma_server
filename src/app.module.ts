@@ -5,12 +5,13 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
+import { AppLoggerMiddleware } from './common/middlewares/logger.middleware';
 import configuration from './config/configuration';
 import { LoggerModule } from './logger/logger.module';
 import { MailModule } from './mail/mail.module';
-import { AppLoggerMiddleware } from './common/middlewares/logger.middleware';
 import { PostModule } from './post/post.module';
 import { UserModule } from './user/user.module';
+import { CachingModule } from './caching/caching.module';
 
 @Module({
 	imports: [
@@ -47,6 +48,7 @@ import { UserModule } from './user/user.module';
 		AuthModule,
 		LoggerModule,
 		MailModule,
+		CachingModule,
 	],
 	controllers: [AppController],
 	providers: [AppService],

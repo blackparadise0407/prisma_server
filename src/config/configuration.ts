@@ -31,4 +31,9 @@ export default () => ({
 	},
 	host: process.env.HOST,
 	client: process.env.CLIENT,
+	redis: {
+		defaultTtl: 60 * 15, //15 mins
+		host: process.env.REDIS_HOST,
+		port: parseInt(process.env.REDIS_PORT, 10),
+	},
 });

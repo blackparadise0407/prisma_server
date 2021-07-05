@@ -1,4 +1,4 @@
-import { forwardRef, Module } from '@nestjs/common';
+import { CacheModule, forwardRef, Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { LoggerModule } from 'src/logger/logger.module';
@@ -21,6 +21,8 @@ import {
 	ResetPasswordSchema,
 } from './reset-password/reset-password.schema';
 import { ResetPasswordService } from './reset-password/reset-password.service';
+import { CachingModule } from 'src/caching/caching.module';
+import { CachingService } from 'src/caching/caching.service';
 
 @Module({
 	imports: [
@@ -68,6 +70,7 @@ import { ResetPasswordService } from './reset-password/reset-password.service';
 		]),
 		ConfigModule,
 		MailModule,
+		CachingModule,
 		forwardRef(() => UserModule),
 	],
 	controllers: [AuthController],
@@ -80,6 +83,7 @@ import { ResetPasswordService } from './reset-password/reset-password.service';
 		MailService,
 		ConfirmationService,
 		ResetPasswordService,
+		CachingService,
 	],
 	exports: [AuthService, TokenService, ConfirmationService],
 })

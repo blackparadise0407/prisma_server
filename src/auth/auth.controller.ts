@@ -7,32 +7,30 @@ import {
 	Ip,
 	Post,
 	Query,
-	Req,
 	Res,
 	UseGuards,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { AuthGuard } from '@nestjs/passport';
 import {
 	ApiBearerAuth,
 	ApiOperation,
 	ApiResponse,
 	ApiTags,
 } from '@nestjs/swagger';
+import * as bluebird from 'bluebird';
 import { Response } from 'express';
 import { filter } from 'lodash';
+import { User } from 'src/common/decorators/user.decorator';
 import { GeneralResponse } from 'src/common/responses/general-response';
 import { MailService } from 'src/mail/mail.service';
 import { UserService } from 'src/user/user.service';
 import { AuthService } from './auth.service';
 import { ConfirmationService } from './confirmation/confirmation.service';
 import { GoogleLoginDTO, LoginInputDTO } from './dto/login-input.dto';
-import { TokenService } from './token/token.service';
-import * as bluebird from 'bluebird';
-import { AuthGuard } from '@nestjs/passport';
-import { User } from 'src/common/decorators/user.decorator';
 import { CreateNewPasswordDTO, ResetPasswordDTO } from './dto/reset-input.dto';
 import { ResetPasswordService } from './reset-password/reset-password.service';
-import { AppModule } from 'src/app.module';
+import { TokenService } from './token/token.service';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -340,5 +338,6 @@ export class AuthController {
 	@ApiResponse({ status: HttpStatus.BAD_REQUEST, type: BadRequestException })
 	async logout(@User() user) {
 		await this.tokenService.revokeTokenForUser(user.id);
+		return new GeneralResponse({});
 	}
 }
