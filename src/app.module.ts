@@ -12,6 +12,8 @@ import { MailModule } from './mail/mail.module';
 import { PostModule } from './post/post.module';
 import { UserModule } from './user/user.module';
 import { CachingModule } from './caching/caching.module';
+import { ScheduleModule } from '@nestjs/schedule';
+import { TaskService } from './task/task.service';
 
 @Module({
 	imports: [
@@ -43,6 +45,7 @@ import { CachingModule } from './caching/caching.module';
 			}),
 			inject: [ConfigService],
 		}),
+		ScheduleModule.forRoot(),
 		UserModule,
 		PostModule,
 		AuthModule,
@@ -51,7 +54,7 @@ import { CachingModule } from './caching/caching.module';
 		CachingModule,
 	],
 	controllers: [AppController],
-	providers: [AppService],
+	providers: [AppService, TaskService],
 })
 export class AppModule implements NestModule {
 	static isDev: boolean;

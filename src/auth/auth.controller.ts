@@ -322,7 +322,7 @@ export class AuthController {
 			{ password: body.password },
 		);
 
-		await this.resetPasswordService.deleteById(resetDoc._id);
+		await this.resetPasswordService.delete({ _id: resetDoc._id });
 
 		return new GeneralResponse({
 			message: 'Your password has been successfully reset',

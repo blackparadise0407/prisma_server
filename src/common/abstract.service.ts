@@ -78,6 +78,15 @@ export abstract class AbstractService<T extends Document> {
 		}
 	}
 
+	async deleteMany(filter: FilterQuery<T>): Promise<void> {
+		try {
+			this.deleteMany(filter);
+		} catch (e) {
+			this.serviceLogger.error(e);
+			throw new InternalServerErrorException();
+		}
+	}
+
 	async deleteById(id: string | Types.ObjectId): Promise<void> {
 		try {
 			this._model.findByIdAndDelete(id);
