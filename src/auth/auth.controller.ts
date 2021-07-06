@@ -61,10 +61,6 @@ export class AuthController {
 			);
 		}
 
-		if (user.status !== 'VERIFIED') {
-			throw new BadRequestException('Your account has not been confirmed yet');
-		}
-
 		const isValid = await this.userService.comparePassword(
 			password,
 			user.password,
@@ -74,6 +70,10 @@ export class AuthController {
 			throw new BadRequestException(
 				'The email address or password you entered is incorrect',
 			);
+		}
+
+		if (user.status !== 'VERIFIED') {
+			throw new BadRequestException('Your account has not been confirmed yet');
 		}
 
 		const oldRefreshToken = await this.tokenService.findAll({
@@ -112,16 +112,15 @@ export class AuthController {
 	@ApiResponse({ status: HttpStatus.BAD_REQUEST, type: BadRequestException })
 	async confirm(@Query() query: { code: string }, @Res() res: Response) {
 		const { code } = query;
-		const confirmation = await this.cachingService.get<IConfirmation>(code);
+		const confirmation = await this.confirmationService.findOne({ code });
+
 		if (!confirmation) {
-			// const confirmation = await this.confirmationService.findOne({ code });
-
-			// if (!confirmation) {
-			// 	throw new BadRequestException(
-			// 		'Confirmation link is invalid or you has already confirm your account',
-			// 	);
-			// }
-
+			throw new BadRequestException(
+				'Confirmation link is invalid or you has already confirm your account',
+			);
+		}
+		const currentDate = new Date();
+		if (confirmation.expiredAt < currentDate) {
 			const user = await this.userService.findById(
 				confirmation.userId.toString(),
 			);
@@ -135,9 +134,9 @@ export class AuthController {
 				throw new BadRequestException('You has already confirm your account');
 			}
 
-			const code = await this.confirmationService.createConfirmationCode(
-				user._id.toString(),
-			);
+			const code = await this.confirmationService.createConfirmationCode({
+				userId: user._id,
+			});
 			await this.mailService.sendUserConfirmation(user, code);
 			res.send(
 				new GeneralResponse({
@@ -177,9 +176,9 @@ export class AuthController {
 
 		if (!existingUser) {
 			const user = await this.userService.create(body);
-			const code = await this.confirmationService.createConfirmationCode(
-				user._id.toString(),
-			);
+			const code = await this.confirmationService.createConfirmationCode({
+				userId: user._id,
+			});
 			await this.mailService.sendUserConfirmation(user, code);
 			return new GeneralResponse({});
 		}

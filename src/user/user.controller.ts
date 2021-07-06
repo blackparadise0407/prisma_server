@@ -47,9 +47,9 @@ export class UserController {
 			throw new BadRequestException('Email address already in use');
 		}
 		const user = await this.userService.create(body);
-		const code = await this.confirmationService.createConfirmationCode(
-			user._id.toString(),
-		);
+		const code = await this.confirmationService.createConfirmationCode({
+			userId: user._id,
+		});
 		await this.mailService.sendUserConfirmation(user, code);
 		return new GeneralResponse({});
 	}
