@@ -54,11 +54,3 @@ export class UserController {
 		return new GeneralResponse({});
 	}
 }
-
-//google response
-// email: "blackparadise0407@gmail.com"
-// familyName: "Pham"
-// givenName: "Khoa"
-// googleId: "108315643119680032945"
-// imageUrl: "https://lh3.googleusercontent.com/a-/AOh14Gjl11noqb1bn_FDqnnQK4jRspTRWoQlDEZDIodLAw=s96-c"
-// name: "Khoa Pham"
