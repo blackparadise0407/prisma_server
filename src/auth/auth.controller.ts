@@ -18,6 +18,7 @@ import {
 	ApiResponse,
 	ApiTags,
 } from '@nestjs/swagger';
+import axios from 'axios';
 import * as bluebird from 'bluebird';
 import { Response } from 'express';
 import { filter } from 'lodash';
@@ -32,6 +33,7 @@ import { ConfirmationService } from './confirmation/confirmation.service';
 import { GoogleLoginDTO, LoginInputDTO } from './dto/login-input.dto';
 import { CreateNewPasswordDTO, ResetPasswordDTO } from './dto/reset-input.dto';
 import { ResetPasswordService } from './reset-password/reset-password.service';
+import { RefreshToken } from './token/refresh-token.schema';
 import { TokenService } from './token/token.service';
 
 @ApiTags('auth')
@@ -89,14 +91,23 @@ export class AuthController {
 				await this.tokenService.delete({ _id: p._id });
 			});
 		}
+		let refreshToken: string;
+
+		if (oldRefreshToken.length === 1) {
+			refreshToken = await this.tokenService.renewRefreshToken(
+				oldRefreshToken[0]._id.toString(),
+			);
+		} else {
+			refreshToken = await this.tokenService.createRefreshToken({
+				userId: user._id,
+				ipAddress: ip,
+			});
+		}
 
 		const accessToken = await this.tokenService.createAccessToken({
 			sub: user._id,
 		});
-		const refreshToken = await this.tokenService.createRefreshToken({
-			userId: user._id,
-			ipAddress: ip,
-		});
+
 		return new GeneralResponse({
 			data: {
 				accessToken,
@@ -156,43 +167,45 @@ export class AuthController {
 		}
 	}
 
-	@Post('google')
+	@Get('google')
 	@ApiResponse({ status: HttpStatus.OK })
 	@ApiResponse({ status: HttpStatus.BAD_REQUEST, type: BadRequestException })
 	@ApiOperation({
 		summary: 'Google sign-in',
 		description: 'Sign up or login with google account',
 	})
-	async registerGoogle(@Ip() ip: string, @Body() body: GoogleLoginDTO) {
-		const { googleId } = body;
-		const existingUser = await this.userService.findOne({
+	async registerGoogle(
+		@Ip() ip: string,
+		@Query('access_token') access_token: string,
+	) {
+		if (!access_token) {
+			throw new BadRequestException('Access token is required');
+		}
+		const { data } = await axios.get(
+			`https://www.googleapis.com/oauth2/v3/userinfo?access_token=${access_token}`,
+		);
+
+		const { sub: googleId } = data;
+		let existingUser = await this.userService.findOne({
 			$or: [
 				{ googleId },
 				{
-					email: body.email,
+					email: data.email,
 				},
 			],
 		});
 
 		if (!existingUser) {
-			const user = await this.userService.create(body);
-			const code = await this.confirmationService.createConfirmationCode({
-				userId: user._id,
+			const body: GoogleLoginDTO = {
+				username: data.name,
+				email: data.email,
+				avatar: data.picture,
+				googleId: data.sub,
+			};
+			existingUser = await this.userService.create({
+				...body,
+				status: 'VERIFIED',
 			});
-			await this.mailService.sendUserConfirmation(user, code);
-			return new GeneralResponse({});
-		}
-
-		if (!existingUser.googleId) {
-			throw new BadRequestException(
-				'There already an account linked with this email address',
-			);
-		}
-
-		if (existingUser.status !== 'VERIFIED') {
-			throw new BadRequestException(
-				'Your account is not verified yet! Please confirm you account',
-			);
 		}
 
 		const oldRefreshToken = await this.tokenService.findAll({
@@ -317,10 +330,8 @@ export class AuthController {
 			throw new BadRequestException('Email address does not match');
 		}
 
-		await this.userService.findOneAndUpdate(
-			{ _id: resetDoc.userId },
-			{ password: body.password },
-		);
+		user.set({ password: body.password });
+		await user.save();
 
 		await this.resetPasswordService.delete({ _id: resetDoc._id });
 

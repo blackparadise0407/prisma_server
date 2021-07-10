@@ -59,6 +59,18 @@ export class TokenService extends AbstractService<RefreshTokenDocument> {
 		);
 	}
 
+	async renewRefreshToken(tokenId: string): Promise<string> {
+		const secret = randomBytes(64).toString('hex');
+		const expiredAt = moment()
+			.add(this.configService.get<number>('jwt.refresh.ttl'), 'seconds')
+			.toDate();
+		const token = await this.findOneAndUpdate(
+			{ _id: tokenId },
+			{ $set: { value: secret, expiredAt } },
+		);
+		return token.value;
+	}
+
 	async createRefreshToken(tokenContent: {
 		userId: string;
 		ipAddress: string;

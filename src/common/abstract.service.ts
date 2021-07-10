@@ -96,4 +96,16 @@ export abstract class AbstractService<T extends Document> {
 			throw new InternalServerErrorException();
 		}
 	}
+
+	async updateOne(
+		filter: FilterQuery<T>,
+		update: UpdateQuery<T>,
+	): Promise<void> {
+		try {
+			this._model.updateOne(filter, update);
+		} catch (e) {
+			this.serviceLogger.error(e);
+			throw new InternalServerErrorException();
+		}
+	}
 }

@@ -13,16 +13,16 @@ export class LoginInputDTO {
 }
 export class GoogleLoginDTO {
 	@ApiProperty()
-	readonly username?: string;
+	username?: string;
 
 	@IsEmail({}, { message: 'Invalid email address' })
 	@ApiProperty()
 	email?: string;
 
 	@ApiProperty()
-	readonly avatar?: string;
+	avatar?: string;
 
 	@IsNotEmpty({ message: 'Google ID is required' })
 	@ApiProperty()
-	readonly googleId?: string;
+	googleId?: string;
 }

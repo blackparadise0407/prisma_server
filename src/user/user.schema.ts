@@ -3,7 +3,13 @@ import { Document } from 'mongoose';
 import { EnumToArray } from 'src/utils/enum-to-array';
 import { UserStatus } from './user.interface';
 
-const UserStatusEnum: UserStatus[] = ['VERIFIED', 'PENDING', 'DEACTIVATED'];
+// const UserStatusEnum: UserStatus[] = ['VERIFIED', 'PENDING', 'DEACTIVATED'];
+
+export enum UserStatusEnum {
+	VERIFIED = 'VERIFIED',
+	PENDING = 'PENDING',
+	DEACTIVATED = 'DEACTIVATED',
+}
 
 export type UserDocument = User & Document;
 
