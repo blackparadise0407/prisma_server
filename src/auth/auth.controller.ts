@@ -7,7 +7,9 @@ import {
 	Ip,
 	Post,
 	Query,
+	Req,
 	Res,
+	UnauthorizedException,
 	UseGuards,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -20,7 +22,7 @@ import {
 } from '@nestjs/swagger';
 import axios from 'axios';
 import * as bluebird from 'bluebird';
-import { Response } from 'express';
+import { Request, Response } from 'express';
 import { filter } from 'lodash';
 import { CachingService } from 'src/caching/caching.service';
 import { User } from 'src/common/decorators/user.decorator';
@@ -28,12 +30,10 @@ import { GeneralResponse } from 'src/common/responses/general-response';
 import { MailService } from 'src/mail/mail.service';
 import { UserService } from 'src/user/user.service';
 import { AuthService } from './auth.service';
-import { IConfirmation } from './confirmation/confirmation.interface';
 import { ConfirmationService } from './confirmation/confirmation.service';
 import { GoogleLoginDTO, LoginInputDTO } from './dto/login-input.dto';
 import { CreateNewPasswordDTO, ResetPasswordDTO } from './dto/reset-input.dto';
 import { ResetPasswordService } from './reset-password/reset-password.service';
-import { RefreshToken } from './token/refresh-token.schema';
 import { TokenService } from './token/token.service';
 
 @ApiTags('auth')
@@ -352,5 +352,41 @@ export class AuthController {
 	async logout(@User() user) {
 		await this.tokenService.revokeTokenForUser(user.id);
 		return new GeneralResponse({});
+	}
+
+	// @UseGuards(AuthGuard('jwt'))
+	@Post('refresh-token')
+	@ApiOperation({
+		summary: 'Refresh token',
+		description: 'Retrieve access token from refresh token',
+	})
+	@ApiResponse({ status: HttpStatus.OK })
+	@ApiResponse({ status: HttpStatus.BAD_REQUEST, type: BadRequestException })
+	@ApiResponse({ status: HttpStatus.UNAUTHORIZED, type: UnauthorizedException })
+	async refreshToken(
+		@Req() { headers }: Request,
+		@Body() body: { refreshToken?: string },
+	) {
+		if (!body.refreshToken) {
+			throw new BadRequestException('Refresh token is required');
+		}
+		const refreshToken = await this.tokenService.findOne({
+			value: body.refreshToken,
+		});
+		if (!refreshToken) {
+			throw new BadRequestException('Refresh token is invalid');
+		}
+
+		const oldAccessToken = headers.authorization.split(' ')[1];
+		const accessToken =
+			await this.tokenService.generateAccessTokenFromRefreshToken(
+				refreshToken.value,
+				oldAccessToken,
+			);
+		return new GeneralResponse({
+			data: {
+				accessToken,
+			},
+		});
 	}
 }

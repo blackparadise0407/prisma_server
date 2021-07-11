@@ -24,18 +24,23 @@ export class TokenService extends AbstractService<RefreshTokenDocument> {
 		super(refreshTokenModel);
 	}
 
-	async validateToken(
+	validateToken(
 		token: string,
 		refresh = false,
 		ignoreExpiration = false,
-	): Promise<JwtPayload> {
+	): JwtPayload {
 		try {
 			return verify(
 				token,
 				this.configService.get<string>(
 					`jwt.${refresh ? 'refresh' : 'access'}.secret`,
 				),
-				{ ignoreExpiration },
+				{
+					ignoreExpiration,
+					algorithms: [
+						this.configService.get<string>('jwt.access.algorithm') as Algorithm,
+					],
+				},
 			) as JwtPayload;
 		} catch (e) {
 			if (e.message === 'jwt expired') {
@@ -103,7 +108,7 @@ export class TokenService extends AbstractService<RefreshTokenDocument> {
 			this.delete({ _id: Types.ObjectId(existingToken._id) });
 			throw new BadRequestException('Refresh token already expired');
 		}
-		const oldPayload = await this.validateToken(oldAccessToken, false, true);
+		const oldPayload = this.validateToken(oldAccessToken, false, true);
 		const payload: JwtPayload = {
 			sub: oldPayload.sub,
 		};

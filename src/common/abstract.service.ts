@@ -82,7 +82,6 @@ export abstract class AbstractService<T extends Document> {
 		try {
 			this._model.deleteMany(filter);
 		} catch (e) {
-			console.log(e);
 			this.serviceLogger.error(e);
 			throw new InternalServerErrorException();
 		}

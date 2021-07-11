@@ -6,6 +6,7 @@ import {
 	HttpStatus,
 	Ip,
 	Post,
+	UnauthorizedException,
 	UseGuards,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -15,7 +16,7 @@ import { ConfirmationService } from 'src/auth/confirmation/confirmation.service'
 import { GeneralResponse } from 'src/common/responses/general-response';
 import { MailService } from 'src/mail/mail.service';
 import { CreateUserDTO } from './dto/create-user.dto';
-import { User } from './user.schema';
+import { User } from 'src/common/decorators/user.decorator';
 import { UserService } from './user.service';
 
 @Controller('user')
@@ -26,12 +27,6 @@ export class UserController {
 		private readonly mailService: MailService,
 		private readonly configService: ConfigService,
 	) {}
-
-	@UseGuards(AuthGuard('jwt'))
-	@Get()
-	async get(): Promise<User[]> {
-		return this.userService.findAll();
-	}
 
 	@Post('register')
 	@ApiOperation({ summary: 'Register' })
@@ -52,5 +47,14 @@ export class UserController {
 		});
 		await this.mailService.sendUserConfirmation(user, code);
 		return new GeneralResponse({});
+	}
+
+	@UseGuards(AuthGuard('jwt'))
+	@Get('')
+	@ApiOperation({ summary: "Retrieve user's info" })
+	@ApiResponse({ status: HttpStatus.OK })
+	@ApiResponse({ status: HttpStatus.UNAUTHORIZED, type: UnauthorizedException })
+	async info(@User('id') id: string) {
+		return await this.userService.findById(id);
 	}
 }
