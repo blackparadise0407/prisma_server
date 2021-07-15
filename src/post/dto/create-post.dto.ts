@@ -1,4 +1,6 @@
 import { Field, ObjectType } from '@nestjs/graphql';
+import { ApiProperty } from '@nestjs/swagger';
+import { IsString } from 'class-validator';
 
 @ObjectType()
 export class PostType {
@@ -7,4 +9,12 @@ export class PostType {
 
 	@Field()
 	created_by: string;
+}
+
+export class PostCreateDTO {
+	@ApiProperty()
+	content: string;
+
+	@ApiProperty()
+	photos: string[];
 }

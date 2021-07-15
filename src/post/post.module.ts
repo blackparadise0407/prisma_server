@@ -3,6 +3,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { PostResolver } from './post.resolver';
 import { Post, PostSchema } from './post.schema';
 import { PostService } from './post.service';
+import { PostController } from './post.controller';
 
 @Module({
 	imports: [
@@ -22,7 +23,7 @@ import { PostService } from './post.service';
 			},
 		]),
 	],
-	controllers: [],
+	controllers: [PostController],
 	providers: [PostResolver, PostService],
 })
 export class PostModule {}

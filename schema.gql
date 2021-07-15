@@ -6,12 +6,6 @@ type UserType {
   email: String!
 }
 
-type PostType {
-  content: String!
-  created_by: String!
-}
-
 type Query {
   users: [UserType!]!
-  post: [PostType!]!
 }

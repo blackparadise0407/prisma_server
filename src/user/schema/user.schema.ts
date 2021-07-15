@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 import { EnumToArray } from 'src/utils/enum-to-array';
-import { UserStatus } from './user.interface';
+import { UserStatus } from '../user.interface';
 
 // const UserStatusEnum: UserStatus[] = ['VERIFIED', 'PENDING', 'DEACTIVATED'];
 

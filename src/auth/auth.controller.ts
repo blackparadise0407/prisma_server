@@ -63,6 +63,14 @@ export class AuthController {
 			);
 		}
 
+		if (!user.password) {
+			if (user.googleId) {
+				throw new BadRequestException(
+					'The email address you entered is already linked with another account',
+				);
+			}
+		}
+
 		const isValid = await this.userService.comparePassword(
 			password,
 			user.password,
@@ -83,7 +91,7 @@ export class AuthController {
 		});
 
 		if (oldRefreshToken.length > 1) {
-			const otherRefreshToken = await filter(
+			const otherRefreshToken = filter(
 				oldRefreshToken,
 				(p) => p.ipAddress !== ip,
 			);

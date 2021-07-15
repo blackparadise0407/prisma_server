@@ -3,15 +3,14 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import * as bcrypt from 'bcrypt';
 import { AuthModule } from 'src/auth/auth.module';
-import { ConfirmationService } from 'src/auth/confirmation/confirmation.service';
-import { TokenService } from 'src/auth/token/token.service';
 import { LoggerModule } from 'src/logger/logger.module';
 import { LoggerService } from 'src/logger/logger.service';
 import { MailModule } from 'src/mail/mail.module';
 import { MailService } from 'src/mail/mail.service';
+import { UserAction, UserActionSchema } from './schema/user-action.schema';
+import { User, UserDocument, UserSchema } from './schema/user.schema';
 import { UserController } from './user.controller';
 import { UserResolver } from './user.resolver';
-import { User, UserDocument, UserSchema } from './user.schema';
 import { UserService } from './user.service';
 @Module({
 	imports: [
@@ -58,6 +57,19 @@ import { UserService } from './user.service';
 							for (const v in ret) {
 								if (!ret[v]) delete ret[v];
 							}
+						},
+					});
+					return schema;
+				},
+			},
+			{
+				name: UserAction.name,
+				useFactory: () => {
+					const schema = UserActionSchema;
+					schema.set('toJSON', {
+						transform: (_, ret: { [key: string]: any }) => {
+							ret.id = ret._id;
+							delete ret._id;
 						},
 					});
 					return schema;
