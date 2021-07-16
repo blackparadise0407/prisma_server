@@ -71,4 +71,32 @@ export class MailProcessor {
 			throw e;
 		}
 	}
+
+	@Process('userForgetPassword')
+	async sendUserForgetPassword(
+		job: Job<{ user: User; code: string }>,
+	): Promise<any> {
+		const { user, code } = job.data;
+
+		const url = AppModule.isDev
+			? this.configService.get('host') + '/api/auth/reset?code=' + code
+			: `${this.configService.get('host')}:${this.configService.get('post')}` +
+			  '/api/auth/reset?code=' +
+			  code;
+
+		try {
+			await this.mailerService.sendMail({
+				to: user.email,
+				subject: 'Reset password',
+				template: './forget-password',
+				context: {
+					url,
+					name: user.username,
+				},
+			});
+			return 'Success';
+		} catch (e) {
+			throw e;
+		}
+	}
 }

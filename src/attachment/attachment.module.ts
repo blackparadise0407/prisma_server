@@ -9,7 +9,7 @@ import { MulterModule } from '@nestjs/platform-express';
 @Module({
 	imports: [
 		BullModule.registerQueue({
-			name: 'attachment',
+			name: 'uploadQueue',
 		}),
 		MongooseModule.forFeatureAsync([
 			{
@@ -26,9 +26,6 @@ import { MulterModule } from '@nestjs/platform-express';
 				},
 			},
 		]),
-		MulterModule.register({
-			dest: './public/images',
-		}),
 	],
 	controllers: [AttachmentController],
 	providers: [AttachmentService],

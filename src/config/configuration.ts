@@ -40,4 +40,14 @@ export default () => ({
 		mail: 'mailQueue',
 		upload: 'uploadQueue',
 	},
+	multer: {
+		image: {
+			limit: 1024 * 1024, // 1MB
+			mime: ['image/jpeg', 'image/png', 'image/webp'],
+		},
+		video: {
+			limit: 1024 * 1024 * 100, // 100MB
+			mime: ['video/x-msvideo', 'video/mp4', 'video/mpeg', 'video/webm'],
+		},
+	},
 });
