@@ -4,7 +4,6 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { CachingModule } from 'src/caching/caching.module';
 import { LoggerModule } from 'src/logger/logger.module';
 import { MailModule } from 'src/mail/mail.module';
-import { MailService } from 'src/mail/mail.service';
 import { UserModule } from 'src/user/user.module';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
@@ -74,14 +73,10 @@ import { TokenService } from './token/token.service';
 	controllers: [AuthController],
 	providers: [
 		AuthService,
-		// ConfigService,
-		// LoggerService,
 		TokenService,
 		JwtStrategy,
-		MailService,
 		ConfirmationService,
 		ResetPasswordService,
-		// CachingService,
 	],
 	exports: [AuthService, TokenService, ConfirmationService],
 })

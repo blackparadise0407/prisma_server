@@ -6,7 +6,6 @@ import { AuthModule } from 'src/auth/auth.module';
 import { LoggerModule } from 'src/logger/logger.module';
 import { LoggerService } from 'src/logger/logger.service';
 import { MailModule } from 'src/mail/mail.module';
-import { MailService } from 'src/mail/mail.service';
 import { UserAction, UserActionSchema } from './schema/user-action.schema';
 import { User, UserDocument, UserSchema } from './schema/user.schema';
 import { UserController } from './user.controller';
@@ -81,13 +80,7 @@ import { UserService } from './user.service';
 		ConfigModule,
 		forwardRef(() => AuthModule),
 	],
-	providers: [
-		UserResolver,
-		UserService,
-		LoggerService,
-		MailService,
-		ConfigService,
-	],
+	providers: [UserResolver, UserService],
 	exports: [UserService],
 	controllers: [UserController],
 })

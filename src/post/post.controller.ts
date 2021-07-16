@@ -14,7 +14,7 @@ export class PostController {
 	@Post('')
 	async create(@User('id') userId: string, @Body() body: PostCreateDTO) {
 		const post = await this.postService.create({ ...body, userId });
-		console.log(post);
+
 		return new GeneralResponse({
 			data: post,
 		});

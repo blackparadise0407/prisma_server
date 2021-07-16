@@ -14,6 +14,8 @@ import { UserModule } from './user/user.module';
 import { CachingModule } from './caching/caching.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { TaskService } from './task/task.service';
+import { AttachmentModule } from './attachment/attachment.module';
+import { BullModule } from '@nestjs/bull';
 
 @Module({
 	imports: [
@@ -45,6 +47,16 @@ import { TaskService } from './task/task.service';
 			}),
 			inject: [ConfigService],
 		}),
+		BullModule.forRootAsync({
+			imports: [ConfigModule],
+			useFactory: (configService: ConfigService) => ({
+				redis: {
+					host: configService.get('redis.host'),
+					port: configService.get<number>('redis.port'),
+				},
+			}),
+			inject: [ConfigService],
+		}),
 		ScheduleModule.forRoot(),
 		UserModule,
 		PostModule,
@@ -52,6 +64,7 @@ import { TaskService } from './task/task.service';
 		LoggerModule,
 		MailModule,
 		CachingModule,
+		AttachmentModule,
 	],
 	controllers: [AppController],
 	providers: [AppService, TaskService],
