@@ -2,7 +2,9 @@ import { BullModule } from '@nestjs/bull';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
+import { CloudinaryModule } from 'src/cloudinary/cloudinary.module';
 import { AttachmentController } from './attachment.controller';
+import { AttachmentProcessor } from './attachment.processor';
 import { Attachment, AttachmentSchema } from './attachment.schema';
 import { AttachmentService } from './attachment.service';
 
@@ -26,9 +28,10 @@ import { AttachmentService } from './attachment.service';
 		BullModule.registerQueue({
 			name: 'uploadQueue',
 		}),
+		CloudinaryModule,
 		ConfigModule,
 	],
 	controllers: [AttachmentController],
-	providers: [AttachmentService],
+	providers: [AttachmentService, AttachmentProcessor],
 })
 export class AttachmentModule {}

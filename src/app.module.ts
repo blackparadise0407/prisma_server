@@ -1,21 +1,24 @@
+import { BullModule } from '@nestjs/bull';
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { GraphQLModule } from '@nestjs/graphql';
 import { MongooseModule } from '@nestjs/mongoose';
+import { ScheduleModule } from '@nestjs/schedule';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { AttachmentModule } from './attachment/attachment.module';
 import { AuthModule } from './auth/auth.module';
+import { CachingModule } from './caching/caching.module';
 import { AppLoggerMiddleware } from './common/middlewares/logger.middleware';
 import configuration from './config/configuration';
 import { LoggerModule } from './logger/logger.module';
 import { MailModule } from './mail/mail.module';
 import { PostModule } from './post/post.module';
-import { UserModule } from './user/user.module';
-import { CachingModule } from './caching/caching.module';
-import { ScheduleModule } from '@nestjs/schedule';
 import { TaskService } from './task/task.service';
-import { AttachmentModule } from './attachment/attachment.module';
-import { BullModule } from '@nestjs/bull';
+import { UserModule } from './user/user.module';
+import { CloudinaryModule } from './cloudinary/cloudinary.module';
 
 @Module({
 	imports: [
@@ -57,6 +60,10 @@ import { BullModule } from '@nestjs/bull';
 			}),
 			inject: [ConfigService],
 		}),
+		ServeStaticModule.forRoot({
+			rootPath: join(__dirname, '..', 'public'),
+			serveRoot: '/public',
+		}),
 		ScheduleModule.forRoot(),
 		UserModule,
 		PostModule,
@@ -65,6 +72,7 @@ import { BullModule } from '@nestjs/bull';
 		MailModule,
 		CachingModule,
 		AttachmentModule,
+		CloudinaryModule,
 	],
 	controllers: [AppController],
 	providers: [AppService, TaskService],

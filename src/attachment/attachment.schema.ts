@@ -15,19 +15,19 @@ export type AttachmentType = 'IMAGE' | 'VIDEO' | 'FILE';
 @Schema({ versionKey: false, timestamps: true })
 export class Attachment {
 	@Prop({ enum: [...EnumToArray(AttachmentTypeEnum)] })
-	type: string;
+	type?: string;
 
 	@Prop({ type: SchemaTypes.ObjectId, ref: 'User' })
-	userId: Types.ObjectId;
+	userId?: Types.ObjectId;
 
 	@Prop({ type: SchemaTypes.ObjectId, ref: 'Post' })
-	postId: Types.ObjectId;
+	postId?: Types.ObjectId;
 
 	@Prop({ required: true })
-	size: number;
+	size?: number;
 
 	@Prop({ required: true })
-	url: string;
+	url?: string;
 }
 
 export const AttachmentSchema = SchemaFactory.createForClass(Attachment);

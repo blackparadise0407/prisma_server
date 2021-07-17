@@ -69,7 +69,7 @@ export class TokenService extends AbstractService<RefreshTokenDocument> {
 		const expiredAt = moment()
 			.add(this.configService.get<number>('jwt.refresh.ttl'), 'seconds')
 			.toDate();
-		const token = await this.findOneAndUpdate(
+		const token = await this.updateOne(
 			{ _id: tokenId },
 			{ $set: { value: secret, expiredAt } },
 		);

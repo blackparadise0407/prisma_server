@@ -1,11 +1,5 @@
 import { MailerService } from '@nestjs-modules/mailer';
-import {
-	OnQueueActive,
-	OnQueueCompleted,
-	OnQueueFailed,
-	Process,
-	Processor,
-} from '@nestjs/bull';
+import { OnQueueFailed, Process, Processor } from '@nestjs/bull';
 import { Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Job } from 'bull';

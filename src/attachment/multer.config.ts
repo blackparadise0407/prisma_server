@@ -14,14 +14,12 @@ const CONF = {
 	},
 };
 
-const storage = (type: AttachmentType) => {
-	return diskStorage({
-		destination: join('public', type.toLowerCase()),
-		filename: (_, file, cb) => {
-			cb(null, generateFileName(file));
-		},
-	});
-};
+const storage = diskStorage({
+	destination: './public',
+	filename: (_, file, cb) => {
+		cb(null, generateFileName(file));
+	},
+});
 
 const generateFileName = (file: Express.Multer.File): string => {
 	return `${Date.now()}${extname(file.originalname)}`;
@@ -52,7 +50,7 @@ const fileFilter = (type: AttachmentType) => {
 
 export const multetOpts = (type: AttachmentType): MulterOptions => {
 	return {
-		storage: storage(type),
+		storage,
 		fileFilter: fileFilter(type),
 		limits: {
 			fileSize: CONF[type.toLowerCase()].limit,

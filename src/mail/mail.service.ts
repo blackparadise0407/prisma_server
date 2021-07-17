@@ -3,7 +3,6 @@ import { InjectQueue } from '@nestjs/bull';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Queue } from 'bull';
-import { AppModule } from 'src/app.module';
 import { User } from 'src/user/schema/user.schema';
 
 @Injectable()

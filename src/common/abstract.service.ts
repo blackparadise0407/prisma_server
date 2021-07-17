@@ -2,7 +2,7 @@ import { InternalServerErrorException } from '@nestjs/common';
 import { Document, FilterQuery, Model, Types, UpdateQuery } from 'mongoose';
 import { LoggerService } from 'src/logger/logger.service';
 
-export abstract class AbstractService<T extends Document> {
+export abstract class AbstractService<T extends Document, S = unknown> {
 	private readonly _model: Model<T>;
 	private readonly serviceLogger: LoggerService;
 
@@ -37,7 +37,7 @@ export abstract class AbstractService<T extends Document> {
 		}
 	}
 
-	async create(payload: any): Promise<T> {
+	async create(payload: S): Promise<T> {
 		try {
 			const record = new this._model(payload);
 			await record.save();
@@ -57,12 +57,12 @@ export abstract class AbstractService<T extends Document> {
 		}
 	}
 
-	async findOneAndUpdate(
-		filter: FilterQuery<T>,
-		update: UpdateQuery<T>,
-	): Promise<T> {
+	async updateOne(filter: FilterQuery<T>, update: UpdateQuery<T>): Promise<T> {
 		try {
-			return this._model.findOneAndUpdate(filter, update, { new: true });
+			return this._model.findOneAndUpdate(filter, update, {
+				new: true,
+				upsert: true,
+			});
 		} catch (e) {
 			this.serviceLogger.error(e);
 			throw new InternalServerErrorException();
@@ -90,18 +90,6 @@ export abstract class AbstractService<T extends Document> {
 	async deleteById(id: string | Types.ObjectId): Promise<T> {
 		try {
 			return this._model.findByIdAndDelete(id);
-		} catch (e) {
-			this.serviceLogger.error(e);
-			throw new InternalServerErrorException();
-		}
-	}
-
-	async updateOne(
-		filter: FilterQuery<T>,
-		update: UpdateQuery<T>,
-	): Promise<void> {
-		try {
-			this._model.updateOne(filter, update);
 		} catch (e) {
 			this.serviceLogger.error(e);
 			throw new InternalServerErrorException();

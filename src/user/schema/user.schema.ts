@@ -16,29 +16,29 @@ export type UserDocument = User & Document;
 @Schema({ versionKey: false, timestamps: true })
 export class User {
 	@Prop({ index: true })
-	username: string;
+	username?: string;
 
 	@Prop({ index: true })
-	email: string;
+	email?: string;
 
 	@Prop()
-	password: string;
+	password?: string;
 
 	@Prop()
-	googleId: string;
+	googleId?: string;
 
 	@Prop()
-	facebookId: string;
+	facebookId?: string;
 
 	@Prop()
-	avatar: string;
+	avatar?: string;
 
 	@Prop({
 		required: true,
 		default: 'PENDING',
 		enum: [...EnumToArray(UserStatusEnum)],
 	})
-	status: UserStatus;
+	status!: UserStatus;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

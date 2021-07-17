@@ -164,7 +164,7 @@ export class AuthController {
 				}),
 			);
 		} else {
-			await this.userService.findOneAndUpdate(
+			await this.userService.updateOne(
 				{ _id: confirmation.userId },
 				{ status: 'VERIFIED' },
 			);
@@ -221,7 +221,7 @@ export class AuthController {
 		});
 
 		if (oldRefreshToken.length > 1) {
-			const otherRefreshToken = await filter(
+			const otherRefreshToken = filter(
 				oldRefreshToken,
 				(p) => p.ipAddress !== ip,
 			);
