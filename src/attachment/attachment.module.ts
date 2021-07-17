@@ -1,16 +1,13 @@
-import { Module } from '@nestjs/common';
-import { AttachmentService } from './attachment.service';
-import { AttachmentController } from './attachment.controller';
 import { BullModule } from '@nestjs/bull';
+import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
+import { AttachmentController } from './attachment.controller';
 import { Attachment, AttachmentSchema } from './attachment.schema';
-import { MulterModule } from '@nestjs/platform-express';
+import { AttachmentService } from './attachment.service';
 
 @Module({
 	imports: [
-		BullModule.registerQueue({
-			name: 'uploadQueue',
-		}),
 		MongooseModule.forFeatureAsync([
 			{
 				name: Attachment.name,
@@ -26,6 +23,10 @@ import { MulterModule } from '@nestjs/platform-express';
 				},
 			},
 		]),
+		BullModule.registerQueue({
+			name: 'uploadQueue',
+		}),
+		ConfigModule,
 	],
 	controllers: [AttachmentController],
 	providers: [AttachmentService],

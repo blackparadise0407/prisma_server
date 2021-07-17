@@ -4,7 +4,6 @@ import { MongooseModule } from '@nestjs/mongoose';
 import * as bcrypt from 'bcrypt';
 import { AuthModule } from 'src/auth/auth.module';
 import { LoggerModule } from 'src/logger/logger.module';
-import { LoggerService } from 'src/logger/logger.service';
 import { MailModule } from 'src/mail/mail.module';
 import { UserAction, UserActionSchema } from './schema/user-action.schema';
 import { User, UserDocument, UserSchema } from './schema/user.schema';

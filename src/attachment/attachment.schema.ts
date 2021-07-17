@@ -10,6 +10,8 @@ export enum AttachmentTypeEnum {
 	file = 'FILE',
 }
 
+export type AttachmentType = 'IMAGE' | 'VIDEO' | 'FILE';
+
 @Schema({ versionKey: false, timestamps: true })
 export class Attachment {
 	@Prop({ enum: [...EnumToArray(AttachmentTypeEnum)] })
