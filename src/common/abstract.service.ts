@@ -21,15 +21,7 @@ export abstract class AbstractService<T extends Document, S = unknown> {
 
 	async findAll(filter: FilterQuery<T> = {}, path?: string[]): Promise<T[]> {
 		try {
-			const populate = reduce(
-				path,
-				(r, c) => {
-					return (r += ' ' + c);
-				},
-				'',
-			);
-			console.log(populate);
-			return this._model.find(filter).populate(populate).exec();
+			return this._model.find(filter).populate(path.join(' ')).exec();
 		} catch (e) {
 			this.serviceLogger.error(e);
 			throw new InternalServerErrorException();
