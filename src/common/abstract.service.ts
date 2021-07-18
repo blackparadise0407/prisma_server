@@ -19,9 +19,13 @@ export abstract class AbstractService<T extends Document, S = unknown> {
 		}
 	}
 
-	async findAll(filter: FilterQuery<T> = {}, path?: string[]): Promise<T[]> {
+	async findAll(
+		filter: FilterQuery<T> = {},
+		path: string[] = [],
+	): Promise<T[]> {
 		try {
-			return this._model.find(filter).populate(path.join(' ')).exec();
+			const populatePath = path.join(' ');
+			return this._model.find(filter).populate(populatePath).exec();
 		} catch (e) {
 			this.serviceLogger.error(e);
 			throw new InternalServerErrorException();
