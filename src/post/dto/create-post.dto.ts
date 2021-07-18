@@ -1,6 +1,6 @@
 import { Field, ObjectType } from '@nestjs/graphql';
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString } from 'class-validator';
+import { Types } from 'mongoose';
 
 @ObjectType()
 export class PostType {
@@ -16,5 +16,5 @@ export class PostCreateDTO {
 	content: string;
 
 	@ApiProperty()
-	photos: string[];
+	photos: Types.ObjectId[];
 }

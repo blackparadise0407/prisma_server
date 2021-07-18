@@ -33,6 +33,9 @@ export class User {
 	@Prop()
 	avatar?: string;
 
+	@Prop()
+	website?: string;
+
 	@Prop({
 		required: true,
 		default: 'PENDING',

@@ -1,4 +1,5 @@
 import { InternalServerErrorException } from '@nestjs/common';
+import { reduce } from 'lodash';
 import { Document, FilterQuery, Model, Types, UpdateQuery } from 'mongoose';
 import { LoggerService } from 'src/logger/logger.service';
 
@@ -18,10 +19,17 @@ export abstract class AbstractService<T extends Document, S = unknown> {
 		}
 	}
 
-	async findAll(filter: FilterQuery<T> = {}): Promise<T[]> {
+	async findAll(filter: FilterQuery<T> = {}, path?: string[]): Promise<T[]> {
 		try {
-			this.serviceLogger.log('OK');
-			return this._model.find(filter).exec();
+			const populate = reduce(
+				path,
+				(r, c) => {
+					return (r += ' ' + c);
+				},
+				'',
+			);
+			console.log(populate);
+			return this._model.find(filter).populate(populate).exec();
 		} catch (e) {
 			this.serviceLogger.error(e);
 			throw new InternalServerErrorException();
@@ -61,7 +69,8 @@ export abstract class AbstractService<T extends Document, S = unknown> {
 		try {
 			return this._model.findOneAndUpdate(filter, update, {
 				new: true,
-				upsert: true,
+				// upsert: true,
+				omitUndefined: true,
 			});
 		} catch (e) {
 			this.serviceLogger.error(e);

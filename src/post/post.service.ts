@@ -5,7 +5,7 @@ import { AbstractService } from 'src/common/abstract.service';
 import { Post, PostDocument } from './post.schema';
 
 @Injectable()
-export class PostService extends AbstractService<PostDocument> {
+export class PostService extends AbstractService<PostDocument, Post> {
 	constructor(@InjectModel(Post.name) private postModel: Model<PostDocument>) {
 		super(postModel);
 	}
