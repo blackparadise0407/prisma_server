@@ -19,12 +19,27 @@ import { PostModule } from './post/post.module';
 import { TaskService } from './task/task.service';
 import { UserModule } from './user/user.module';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
+import { TypeOrmModule } from '@nestjs/typeorm';
 
 @Module({
 	imports: [
 		ConfigModule.forRoot({
 			envFilePath: ['.env', '.prod.env'],
 			load: [configuration],
+		}),
+		TypeOrmModule.forRootAsync({
+			imports: [ConfigModule],
+			useFactory: (configService: ConfigService) => ({
+				type: 'postgres',
+				host: configService.get('database.host'),
+				port: configService.get<number>('database.port'),
+				username: configService.get('database.username'),
+				password: configService.get('database.password'),
+				database: configService.get('database.name'),
+				entities: [__dirname + '/../**/*.entity.ts'],
+				synchronize: true,
+			}),
+			inject: [ConfigService],
 		}),
 		GraphQLModule.forRootAsync({
 			imports: [ConfigModule],
