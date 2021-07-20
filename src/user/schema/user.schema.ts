@@ -34,7 +34,7 @@ export class User {
 	avatar?: string;
 
 	@Prop()
-	website?: string;
+	bio?: string;
 
 	@Prop({
 		required: true,
