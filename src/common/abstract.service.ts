@@ -1,5 +1,4 @@
 import { InternalServerErrorException } from '@nestjs/common';
-import { reduce } from 'lodash';
 import { Document, FilterQuery, Model, Types, UpdateQuery } from 'mongoose';
 import { LoggerService } from 'src/logger/logger.service';
 

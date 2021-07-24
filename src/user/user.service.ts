@@ -1,21 +1,17 @@
 import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-import { AbstractService } from 'src/common/abstract.service';
-import { User, UserDocument } from './schema/user.schema';
 import * as bcrypt from 'bcrypt';
+import { BaseService } from 'src/common/base.service';
+import { LoggerService } from 'src/logger/logger.service';
+import { User } from './entities/user.entity';
+import { UserRepository } from './repositories/user.repository';
 
 @Injectable()
-export class UserService extends AbstractService<UserDocument> {
-	constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {
-		super(userModel);
+export class UserService extends BaseService<User, UserRepository> {
+	constructor(repository: UserRepository, logger: LoggerService) {
+		super(repository, logger);
 	}
 
-	async findByPhoneNumber(phoneNumber: string): Promise<UserDocument> {
-		return await this.userModel.findOne({ phoneNumber });
-	}
-
-	async comparePassword(str: string, hashed: string): Promise<boolean> {
-		return await bcrypt.compare(str, hashed);
+	comparePassword(str: string, hashedString: string): Promise<boolean> {
+		return bcrypt.compare(str, hashedString);
 	}
 }

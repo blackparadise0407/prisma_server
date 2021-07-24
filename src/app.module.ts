@@ -38,6 +38,10 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 				database: configService.get('database.name'),
 				entities: [__dirname + '/../**/*.entity.ts'],
 				synchronize: true,
+				migrations: ['./migrations/*.ts'],
+				cli: {
+					migrationsDir: 'src/migrations',
+				},
 			}),
 			inject: [ConfigService],
 		}),
