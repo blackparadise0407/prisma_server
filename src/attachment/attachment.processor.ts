@@ -1,10 +1,9 @@
 import { OnQueueFailed, Process, Processor } from '@nestjs/bull';
 import { Logger } from '@nestjs/common';
 import { Job } from 'bull';
-import { Types } from 'mongoose';
+import * as fs from 'fs';
 import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 import { AttachmentService } from './attachment.service';
-import * as fs from 'fs';
 
 @Processor('uploadQueue')
 export class AttachmentProcessor {
@@ -24,7 +23,7 @@ export class AttachmentProcessor {
 
 	@Process('imageUpload')
 	async uploadImage(
-		job: Job<{ id: string; path: string; name: string }>,
+		job: Job<{ id: number; path: string; name: string }>,
 	): Promise<any> {
 		const { id, path, name } = job.data;
 		try {
@@ -33,10 +32,7 @@ export class AttachmentProcessor {
 				name,
 				type: 'IMAGE',
 			});
-			await this.attachmentService.updateOne(
-				{ _id: Types.ObjectId(id) },
-				{ $set: { url } },
-			);
+			await this.attachmentService.update(id, { url });
 			fs.unlinkSync(path);
 		} catch (e) {
 			throw e;

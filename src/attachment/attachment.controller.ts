@@ -13,7 +13,7 @@ import { Queue } from 'bull';
 import { Request } from 'express';
 import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 import { GeneralResponse } from 'src/common/responses/general-response';
-import { AttachmentTypeEnum } from './attachment.schema';
+import { AttachmentType } from './attachment.entity';
 import { AttachmentService } from './attachment.service';
 import { multetOpts } from './multer.config';
 
@@ -36,12 +36,12 @@ export class AttachmentController {
 			throw new BadRequestException(req.fileValidationError);
 		}
 		const attachment = await this.attachmentService.create({
-			type: AttachmentTypeEnum.image,
+			type: AttachmentType.image,
 			size: file.size,
 			url: this.attachmentService.getUrl(file.filename),
 		});
 		await this.uploadQueue.add('imageUpload', {
-			id: attachment._id,
+			id: attachment.id,
 			path: file.path,
 			name: file.filename,
 		});

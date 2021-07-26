@@ -20,6 +20,8 @@ import { TaskService } from './task/task.service';
 import { UserModule } from './user/user.module';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ProfileModule } from './profile/profile.module';
+import { PhotoModule } from './photo/photo.module';
 
 @Module({
 	imports: [
@@ -92,6 +94,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 		CachingModule,
 		AttachmentModule,
 		CloudinaryModule,
+		ProfileModule,
 	],
 	controllers: [AppController],
 	providers: [AppService, TaskService],

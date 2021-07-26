@@ -28,12 +28,13 @@ import { CachingService } from 'src/caching/caching.service';
 import { User } from 'src/common/decorators/user.decorator';
 import { GeneralResponse } from 'src/common/responses/general-response';
 import { MailService } from 'src/mail/mail.service';
+import { UserStatus } from 'src/user/user.entity';
 import { UserService } from 'src/user/user.service';
 import { AuthService } from './auth.service';
+import { ConfirmationType } from './confirmation/confirmation.entity';
 import { ConfirmationService } from './confirmation/confirmation.service';
 import { GoogleLoginDTO, LoginInputDTO } from './dto/login-input.dto';
 import { CreateNewPasswordDTO, ResetPasswordDTO } from './dto/reset-input.dto';
-import { ResetPasswordService } from './reset-password/reset-password.service';
 import { TokenService } from './token/token.service';
 
 @ApiTags('auth')
@@ -46,7 +47,6 @@ export class AuthController {
 		private readonly mailService: MailService,
 		private readonly confirmationService: ConfirmationService,
 		private readonly configService: ConfigService,
-		private readonly resetPasswordService: ResetPasswordService,
 		private readonly cachingService: CachingService,
 	) {}
 
@@ -56,7 +56,7 @@ export class AuthController {
 	@ApiResponse({ status: HttpStatus.BAD_REQUEST, type: BadRequestException })
 	async login(@Ip() ip, @Body() body: LoginInputDTO) {
 		const { email, password } = body;
-		const user = await this.userService.findOne({ email });
+		const user = await this.userService.findOne(null, { where: { email } });
 		if (!user) {
 			throw new BadRequestException(
 				'The email address or password you entered is incorrect',
@@ -87,7 +87,7 @@ export class AuthController {
 		}
 
 		const oldRefreshToken = await this.tokenService.findAll({
-			userId: user._id,
+			where: { user },
 		});
 
 		if (oldRefreshToken.length > 1) {
@@ -96,24 +96,24 @@ export class AuthController {
 				(p) => p.ipAddress !== ip,
 			);
 			bluebird.map(otherRefreshToken, async (p) => {
-				await this.tokenService.delete({ _id: p._id });
+				await this.tokenService.delete(p.id);
 			});
 		}
 		let refreshToken: string;
 
 		if (oldRefreshToken.length === 1) {
 			refreshToken = await this.tokenService.renewRefreshToken(
-				oldRefreshToken[0]._id.toString(),
+				oldRefreshToken[0].id,
 			);
 		} else {
 			refreshToken = await this.tokenService.createRefreshToken({
-				userId: user._id,
+				userId: user.id,
 				ipAddress: ip,
 			});
 		}
 
 		const accessToken = await this.tokenService.createAccessToken({
-			sub: user._id,
+			sub: user.id,
 		});
 
 		return new GeneralResponse({
@@ -131,7 +131,9 @@ export class AuthController {
 	@ApiResponse({ status: HttpStatus.BAD_REQUEST, type: BadRequestException })
 	async confirm(@Query() query: { code: string }, @Res() res: Response) {
 		const { code } = query;
-		const confirmation = await this.confirmationService.findOne({ code });
+		const confirmation = await this.confirmationService.findOne(null, {
+			where: { code },
+		});
 
 		if (!confirmation) {
 			throw new BadRequestException(
@@ -154,7 +156,7 @@ export class AuthController {
 			}
 
 			const code = await this.confirmationService.createConfirmationCode({
-				userId: user._id,
+				userId: user.id,
 			});
 			await this.mailService.sendUserConfirmation(user, code);
 			res.send(
@@ -164,10 +166,9 @@ export class AuthController {
 				}),
 			);
 		} else {
-			await this.userService.updateOne(
-				{ _id: confirmation.userId },
-				{ status: 'VERIFIED' },
-			);
+			await this.userService.update(confirmation.userId, {
+				status: UserStatus.VERIFIED,
+			});
 
 			await this.cachingService.delete(code);
 			const redirectUrl = this.configService.get('client') + '/login';
@@ -194,14 +195,10 @@ export class AuthController {
 		);
 
 		const { sub: googleId } = data;
-		let existingUser = await this.userService.findOne({
-			$or: [
-				{ googleId },
-				{
-					email: data.email,
-				},
-			],
-		});
+		let existingUser = await this.userService.findByEmailOrGoogleId(
+			data.email,
+			googleId,
+		);
 
 		if (!existingUser) {
 			const body: GoogleLoginDTO = {
@@ -217,7 +214,7 @@ export class AuthController {
 		}
 
 		const oldRefreshToken = await this.tokenService.findAll({
-			userId: existingUser._id,
+			where: { userId: existingUser.id },
 		});
 
 		if (oldRefreshToken.length > 1) {
@@ -226,15 +223,15 @@ export class AuthController {
 				(p) => p.ipAddress !== ip,
 			);
 			bluebird.map(otherRefreshToken, async (p) => {
-				await this.tokenService.delete({ _id: p._id });
+				await this.tokenService.delete(p.id);
 			});
 		}
 
 		const accessToken = await this.tokenService.createAccessToken({
-			sub: existingUser._id,
+			sub: existingUser.id,
 		});
 		const refreshToken = await this.tokenService.createRefreshToken({
-			userId: existingUser._id,
+			userId: existingUser.id,
 			ipAddress: ip,
 		});
 		return new GeneralResponse({
@@ -252,14 +249,14 @@ export class AuthController {
 	@ApiResponse({ status: HttpStatus.BAD_REQUEST, type: BadRequestException })
 	async forgetPassword(@Body() body: ResetPasswordDTO) {
 		const { email } = body;
-		const user = await this.userService.findOne({ email });
+		const user = await this.userService.findOne(null, { where: { email } });
 		if (!user) {
 			throw new BadRequestException(
 				'Account with this email address does not exist',
 			);
 		}
 		const code = await this.confirmationService.createResetPasswordCode({
-			userId: user._id,
+			userId: user.id,
 		});
 		await this.mailService.sendUserForgetPassword(user, code);
 		return new GeneralResponse({
@@ -273,9 +270,11 @@ export class AuthController {
 	@ApiResponse({ status: HttpStatus.BAD_REQUEST, type: BadRequestException })
 	async getResetLink(@Query() query: { code: string }, @Res() res: Response) {
 		const { code } = query;
-		const confirmation = await this.confirmationService.findOne({
-			code,
-			type: 'FORGET_PASSWORD',
+		const confirmation = await this.confirmationService.findOne(null, {
+			where: {
+				code,
+				type: ConfirmationType.forgetPassword,
+			},
 		});
 
 		if (!confirmation) {
@@ -291,7 +290,7 @@ export class AuthController {
 		const currentDate = new Date();
 		if (confirmation.expiredAt < currentDate) {
 			const code = await this.confirmationService.createResetPasswordCode({
-				userId: user._id,
+				userId: user.id,
 			});
 			await this.mailService.sendUserForgetPassword(user, code);
 			throw new BadRequestException(

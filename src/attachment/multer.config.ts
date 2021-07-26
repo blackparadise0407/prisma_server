@@ -1,7 +1,7 @@
 import { MulterOptions } from '@nestjs/platform-express/multer/interfaces/multer-options.interface';
 import { diskStorage } from 'multer';
-import { extname, join } from 'path';
-import { AttachmentType } from './attachment.schema';
+import { extname } from 'path';
+import { AttachmentType } from './attachment.entity';
 
 const CONF = {
 	image: {

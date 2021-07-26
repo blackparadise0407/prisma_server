@@ -5,23 +5,28 @@ import {
 	UnauthorizedException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { InjectModel } from '@nestjs/mongoose';
+import { InjectRepository } from '@nestjs/typeorm';
 import { randomBytes } from 'crypto';
 import { Algorithm, sign, SignOptions, verify } from 'jsonwebtoken';
 import * as moment from 'moment';
-import { Model, Types } from 'mongoose';
-import { AbstractService } from 'src/common/abstract.service';
+import { BaseService } from 'src/common/base.service';
+import { LoggerService } from 'src/logger/logger.service';
+import { Repository } from 'typeorm';
 import { JwtPayload } from '../jwt-payload';
-import { RefreshToken, RefreshTokenDocument } from './refresh-token.schema';
+import { RefreshToken } from './refresh-token.entity';
 
 @Injectable()
-export class TokenService extends AbstractService<RefreshTokenDocument> {
+export class TokenService extends BaseService<
+	RefreshToken,
+	Repository<RefreshToken>
+> {
 	constructor(
-		@InjectModel(RefreshToken.name)
-		private refreshTokenModel: Model<RefreshTokenDocument>,
+		@InjectRepository(RefreshToken)
+		repository: Repository<RefreshToken>,
+		logger: LoggerService,
 		private readonly configService: ConfigService,
 	) {
-		super(refreshTokenModel);
+		super(repository, logger);
 	}
 
 	validateToken(
@@ -64,32 +69,28 @@ export class TokenService extends AbstractService<RefreshTokenDocument> {
 		);
 	}
 
-	async renewRefreshToken(tokenId: string): Promise<string> {
+	async renewRefreshToken(tokenId: string | number): Promise<string> {
 		const secret = randomBytes(64).toString('hex');
 		const expiredAt = moment()
 			.add(this.configService.get<number>('jwt.refresh.ttl'), 'seconds')
 			.toDate();
-		const token = await this.updateOne(
-			{ _id: tokenId },
-			{ $set: { value: secret, expiredAt } },
-		);
+		const token = await this.update(tokenId, { value: secret, expiredAt });
 		return token.value;
 	}
 
 	async createRefreshToken(tokenContent: {
-		userId: string;
+		userId: number;
 		ipAddress: string;
 	}): Promise<string> {
 		const { userId, ipAddress } = tokenContent;
 		const secret = randomBytes(64).toString('hex');
-		const token: RefreshToken = {
-			userId: Types.ObjectId(userId),
-			value: secret,
-			ipAddress,
-			expiredAt: moment()
-				.add(this.configService.get<number>('jwt.refresh.ttl'), 'seconds')
-				.toDate(),
-		};
+		const token = new RefreshToken();
+		token.userId = userId;
+		token.value = secret;
+		token.ipAddress = ipAddress;
+		token.expiredAt = moment()
+			.add(this.configService.get<number>('jwt.refresh.ttl'), 'seconds')
+			.toDate();
 
 		const refreshToken = await this.create(token);
 		return refreshToken.value;
@@ -99,13 +100,15 @@ export class TokenService extends AbstractService<RefreshTokenDocument> {
 		refreshToken: string,
 		oldAccessToken: string,
 	): Promise<string> {
-		const existingToken = await this.findOne({ value: refreshToken });
+		const existingToken = await this.findOne(null, {
+			where: { value: refreshToken },
+		});
 		const currentDate = new Date();
 		if (!existingToken) {
 			throw new NotFoundException('Refresh token not found');
 		}
 		if (existingToken.expiredAt < currentDate) {
-			this.delete({ _id: Types.ObjectId(existingToken._id) });
+			this.delete(existingToken.id);
 			throw new BadRequestException('Refresh token already expired');
 		}
 		const oldPayload = this.validateToken(oldAccessToken, false, true);
@@ -116,7 +119,7 @@ export class TokenService extends AbstractService<RefreshTokenDocument> {
 		return accessToken;
 	}
 
-	async revokeTokenForUser(userId: string) {
-		await this.delete({ userId: Types.ObjectId(userId) });
-	}
+	// async revokeTokenForUser(userId: string) {
+	// 	await this.delete({ user: userId });
+	// }
 }

@@ -1,28 +1,21 @@
-import { InjectQueue } from '@nestjs/bull';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { InjectModel } from '@nestjs/mongoose';
-import { Queue } from 'bull';
-import { Model } from 'mongoose';
-import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
-import { AbstractService } from 'src/common/abstract.service';
-import { Attachment, AttachmentDocument } from './attachment.schema';
-import { cloudinary } from './cloudinary.config';
+import { BaseService } from 'src/common/base.service';
+import { LoggerService } from 'src/logger/logger.service';
+import { Attachment } from './attachment.entity';
+import { AttachmentRepository } from './attachment.repository';
 
 @Injectable()
-export class AttachmentService extends AbstractService<
-	AttachmentDocument,
-	Attachment
+export class AttachmentService extends BaseService<
+	Attachment,
+	AttachmentRepository
 > {
 	constructor(
-		@InjectQueue('uploadQueue')
-		private readonly attachmentQueue: Queue,
-		@InjectModel(Attachment.name)
-		private readonly attachmentModel: Model<AttachmentDocument>,
+		repository: AttachmentRepository,
+		logger: LoggerService,
 		private readonly configService: ConfigService,
-		private readonly cloudinaryService: CloudinaryService,
 	) {
-		super(attachmentModel);
+		super(repository, logger);
 	}
 
 	getUrl(filename: string): string {

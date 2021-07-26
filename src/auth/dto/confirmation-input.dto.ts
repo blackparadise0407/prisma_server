@@ -3,7 +3,7 @@ import { ConfirmationType } from '../confirmation/confirmation.interface';
 
 export class ConfirmationInputDTO {
 	@IsNotEmpty({ message: 'User ID is required' })
-	readonly userId?: string;
+	readonly userId?: number;
 
 	@IsNotEmpty({ message: 'Code is required' })
 	code?: string;

@@ -27,7 +27,7 @@ export class BaseService<T extends BaseEntity, R extends Repository<T>> {
 		}
 	}
 
-	findOne(id?: EntityId, opt: FindOneOptions<T> = {}): Promise<T> {
+	findOne(id: EntityId, opt: FindOneOptions<T> = {}): Promise<T> {
 		try {
 			return this.repository.findOne(id, opt);
 		} catch (e) {
@@ -55,19 +55,19 @@ export class BaseService<T extends BaseEntity, R extends Repository<T>> {
 	}
 
 	async update(
-		crit: EntityId & FindConditions<T>,
+		crit: EntityId | FindConditions<T>,
 		data: QueryDeepPartialEntity<T>,
 	): Promise<T> {
 		try {
 			await this.repository.update(crit, data);
-			return this.repository.findOne(crit);
+			return this.repository.findOne(crit as EntityId);
 		} catch (e) {
 			this.logger.error(e.message);
 			throw new InternalServerErrorException();
 		}
 	}
 
-	async delete(crit: EntityId & FindConditions<T>): Promise<boolean> {
+	async delete(crit: EntityId | FindConditions<T>): Promise<boolean> {
 		const result = await this.repository.delete(crit);
 		if (result.affected > 0) {
 			return true;
