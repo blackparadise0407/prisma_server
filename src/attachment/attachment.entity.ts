@@ -14,7 +14,7 @@ export enum AttachmentType {
 	file = 'FILE',
 }
 
-@Entity({ name: 'attachments' })
+@Entity('attachments')
 export class Attachment extends BaseEntity {
 	@PrimaryGeneratedColumn()
 	id: number;

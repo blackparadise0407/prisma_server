@@ -1,5 +1,5 @@
 import { IsNotEmpty } from 'class-validator';
-import { ConfirmationType } from '../confirmation/confirmation.interface';
+import { ConfirmationType } from '../confirmation/confirmation.entity';
 
 export class ConfirmationInputDTO {
 	@IsNotEmpty({ message: 'User ID is required' })

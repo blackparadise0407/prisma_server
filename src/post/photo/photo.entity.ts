@@ -11,7 +11,7 @@ import {
 } from 'typeorm';
 import { Post } from '../post.entity';
 
-@Entity({ name: 'photos' })
+@Entity('photos')
 export class Photo extends BaseEntity {
 	@PrimaryGeneratedColumn()
 	id: number;

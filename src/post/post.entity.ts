@@ -9,7 +9,7 @@ import {
 } from 'typeorm';
 import { Photo } from './photo/photo.entity';
 
-@Entity({ name: 'posts' })
+@Entity('posts')
 export class Post extends BaseEntity {
 	@PrimaryGeneratedColumn()
 	id: number;

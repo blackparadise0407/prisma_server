@@ -4,7 +4,7 @@ import { Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Job } from 'bull';
 import { AppModule } from 'src/app.module';
-import { User } from 'src/user/schema/user.schema';
+import { User } from 'src/user/user.entity';
 
 @Processor('mailQueue')
 export class MailProcessor {

@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { InjectRepository } from '@nestjs/typeorm';
 import { BaseService } from 'src/common/base.service';
 import { LoggerService } from 'src/logger/logger.service';
 import { Attachment } from './attachment.entity';
@@ -11,7 +12,7 @@ export class AttachmentService extends BaseService<
 	AttachmentRepository
 > {
 	constructor(
-		repository: AttachmentRepository,
+		@InjectRepository(Attachment) repository: AttachmentRepository,
 		logger: LoggerService,
 		private readonly configService: ConfigService,
 	) {

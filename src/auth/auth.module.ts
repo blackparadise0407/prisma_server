@@ -10,12 +10,13 @@ import { AuthService } from './auth.service';
 import { Confirmation } from './confirmation/confirmation.entity';
 import { ConfirmationService } from './confirmation/confirmation.service';
 import { JwtStrategy } from './strategies/jwt-strategy';
+import { RefreshToken } from './token/refresh-token.entity';
 import { TokenService } from './token/token.service';
 
 @Module({
 	imports: [
+		TypeOrmModule.forFeature([Confirmation, RefreshToken]),
 		LoggerModule,
-		TypeOrmModule.forFeature([Confirmation]),
 		ConfigModule,
 		MailModule,
 		CachingModule,

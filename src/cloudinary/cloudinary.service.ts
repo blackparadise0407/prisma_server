@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { v2 } from 'cloudinary';
-import { AttachmentType } from 'src/attachment/attachment.schema';
+import { AttachmentType } from 'src/attachment/attachment.entity';
 
 @Injectable()
 export class CloudinaryService {

@@ -7,7 +7,7 @@ import { BaseService } from 'src/common/base.service';
 import { LoggerService } from 'src/logger/logger.service';
 import { Repository } from 'typeorm';
 import { ConfirmationInputDTO } from '../dto/confirmation-input.dto';
-import { Confirmation } from './confirmation.entity';
+import { Confirmation, ConfirmationType } from './confirmation.entity';
 
 @Injectable()
 export class ConfirmationService extends BaseService<
@@ -27,7 +27,7 @@ export class ConfirmationService extends BaseService<
 			.add(this.configService.get<number>('confirmation.ttl'), 's')
 			.toDate();
 		payload.code = randomBytes(16).toString('hex');
-		payload.type = 'CONFIRMATION';
+		payload.type = ConfirmationType.emailConfirm;
 		const confirmation = await this.create(payload);
 		return confirmation.code;
 	}
@@ -39,7 +39,7 @@ export class ConfirmationService extends BaseService<
 			.add(this.configService.get<number>('confirmation.ttl'), 's')
 			.toDate();
 		payload.code = randomBytes(16).toString('hex');
-		payload.type = 'FORGET_PASSWORD';
+		payload.type = ConfirmationType.resetPassword;
 		const confirmation = await this.create(payload);
 		return confirmation.code;
 	}

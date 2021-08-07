@@ -8,7 +8,7 @@ import {
 	PrimaryGeneratedColumn,
 } from 'typeorm';
 
-@Entity({ name: 'refresh_tokens' })
+@Entity('refresh_tokens')
 export class RefreshToken extends BaseEntity {
 	@PrimaryGeneratedColumn()
 	id: number;

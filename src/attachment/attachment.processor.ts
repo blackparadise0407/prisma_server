@@ -3,6 +3,7 @@ import { Logger } from '@nestjs/common';
 import { Job } from 'bull';
 import * as fs from 'fs';
 import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
+import { AttachmentType } from './attachment.entity';
 import { AttachmentService } from './attachment.service';
 
 @Processor('uploadQueue')
@@ -30,7 +31,7 @@ export class AttachmentProcessor {
 			const url = await this.cloudinaryService.uploadSingle({
 				path,
 				name,
-				type: 'IMAGE',
+				type: AttachmentType.image,
 			});
 			await this.attachmentService.update(id, { url });
 			fs.unlinkSync(path);

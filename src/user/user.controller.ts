@@ -16,6 +16,7 @@ import { ConfirmationService } from 'src/auth/confirmation/confirmation.service'
 import { GeneralResponse } from 'src/common/responses/general-response';
 import { MailService } from 'src/mail/mail.service';
 import { CreateUserDTO } from './dto/create-user.dto';
+import { User as UserEntity } from './user.entity';
 import { User } from 'src/common/decorators/user.decorator';
 import { UserService } from './user.service';
 
@@ -37,13 +38,19 @@ export class UserController {
 		@Body() body: CreateUserDTO,
 	): Promise<GeneralResponse> {
 		const { email } = body;
-		const existingUser = await this.userService.findOne({ email });
+		const existingUser = await this.userService.findOne(null, {
+			where: { email },
+		});
 		if (existingUser) {
 			throw new BadRequestException('Email address already in use');
 		}
-		const user = await this.userService.create(body);
+		const data = new UserEntity();
+		data.email = body.email;
+		data.username = body.username;
+		data.password = body.password;
+		const user = await this.userService.create(data);
 		const code = await this.confirmationService.createConfirmationCode({
-			userId: user._id,
+			userId: user.id,
 		});
 		await this.mailService.sendUserConfirmation(user, code);
 		return new GeneralResponse({});

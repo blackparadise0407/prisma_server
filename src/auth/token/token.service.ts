@@ -119,7 +119,7 @@ export class TokenService extends BaseService<
 		return accessToken;
 	}
 
-	// async revokeTokenForUser(userId: string) {
-	// 	await this.delete({ user: userId });
-	// }
+	async revokeTokenForUser(userId: string) {
+		await this.delete({ where: { userId } });
+	}
 }

@@ -1,12 +1,16 @@
 import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-import { AbstractService } from 'src/common/abstract.service';
-import { Post, PostDocument } from './post.schema';
+import { InjectRepository } from '@nestjs/typeorm';
+import { BaseService } from 'src/common/base.service';
+import { LoggerService } from 'src/logger/logger.service';
+import { Post } from './post.entity';
+import { PostRepository } from './post.repository';
 
 @Injectable()
-export class PostService extends AbstractService<PostDocument, Post> {
-	constructor(@InjectModel(Post.name) private postModel: Model<PostDocument>) {
-		super(postModel);
+export class PostService extends BaseService<Post, PostRepository> {
+	constructor(
+		@InjectRepository(Post) repository: PostRepository,
+		logger: LoggerService,
+	) {
+		super(repository, logger);
 	}
 }

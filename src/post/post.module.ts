@@ -1,28 +1,14 @@
 import { Module } from '@nestjs/common';
-import { MongooseModule } from '@nestjs/mongoose';
 import { PostResolver } from './post.resolver';
-import { Post, PostSchema } from './post.schema';
+import { Post } from './post.entity';
 import { PostService } from './post.service';
 import { PostController } from './post.controller';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { LoggerModule } from 'src/logger/logger.module';
+import { Photo } from './photo/photo.entity';
 
 @Module({
-	imports: [
-		MongooseModule.forFeatureAsync([
-			{
-				name: Post.name,
-				useFactory: () => {
-					const schema = PostSchema;
-					schema.set('toJSON', {
-						transform: (_, ret: { [key: string]: any }) => {
-							ret.id = ret._id;
-							delete ret._id;
-						},
-					});
-					return schema;
-				},
-			},
-		]),
-	],
+	imports: [TypeOrmModule.forFeature([Post, Photo]), LoggerModule],
 	controllers: [PostController],
 	providers: [PostResolver, PostService],
 })

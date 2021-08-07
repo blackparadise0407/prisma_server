@@ -67,7 +67,7 @@ export class BaseService<T extends BaseEntity, R extends Repository<T>> {
 		}
 	}
 
-	async delete(crit: EntityId | FindConditions<T>): Promise<boolean> {
+	async delete(crit: EntityId | FindConditions<T> | any): Promise<boolean> {
 		const result = await this.repository.delete(crit);
 		if (result.affected > 0) {
 			return true;

@@ -27,7 +27,7 @@ export class AttachmentController {
 	) {}
 
 	@Post('image')
-	@UseInterceptors(FileInterceptor('file', multetOpts('IMAGE')))
+	@UseInterceptors(FileInterceptor('file', multetOpts(AttachmentType.image)))
 	async uploadImage(
 		@Req() req: Request & { fileValidationError?: string },
 		@UploadedFile() file: Express.Multer.File,

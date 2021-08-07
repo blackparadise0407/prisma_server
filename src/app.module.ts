@@ -2,27 +2,24 @@ import { BullModule } from '@nestjs/bull';
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { GraphQLModule } from '@nestjs/graphql';
-import { MongooseModule } from '@nestjs/mongoose';
 import { ScheduleModule } from '@nestjs/schedule';
 import { ServeStaticModule } from '@nestjs/serve-static';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { join } from 'path';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AttachmentModule } from './attachment/attachment.module';
 import { AuthModule } from './auth/auth.module';
 import { CachingModule } from './caching/caching.module';
+import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { AppLoggerMiddleware } from './common/middlewares/logger.middleware';
 import configuration from './config/configuration';
 import { LoggerModule } from './logger/logger.module';
 import { MailModule } from './mail/mail.module';
 import { PostModule } from './post/post.module';
+import { ProfileModule } from './profile/profile.module';
 import { TaskService } from './task/task.service';
 import { UserModule } from './user/user.module';
-import { CloudinaryModule } from './cloudinary/cloudinary.module';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { ProfileModule } from './profile/profile.module';
-import { PhotoModule } from './photo/photo.module';
-
 @Module({
 	imports: [
 		ConfigModule.forRoot({
@@ -38,12 +35,11 @@ import { PhotoModule } from './photo/photo.module';
 				username: configService.get('database.username'),
 				password: configService.get('database.password'),
 				database: configService.get('database.name'),
-				entities: [__dirname + '/../**/*.entity.ts'],
-				synchronize: true,
-				migrations: ['./migrations/*.ts'],
-				cli: {
-					migrationsDir: 'src/migrations',
-				},
+				entities: ['dist/**/*.entity.js'],
+				synchronize: false,
+				// cli: {
+				// 	migrationsDir: 'src/migrations',
+				// },
 			}),
 			inject: [ConfigService],
 		}),
@@ -59,17 +55,6 @@ import { PhotoModule } from './photo/photo.module';
 					credentials: true,
 				},
 			}),
-		}),
-		MongooseModule.forRootAsync({
-			imports: [ConfigModule],
-			useFactory: async (configService: ConfigService) => ({
-				uri: configService.get<string>('database.uri'),
-				useNewUrlParser: true,
-				useFindAndModify: false,
-				useUnifiedTopology: true,
-				useCreateIndex: true,
-			}),
-			inject: [ConfigService],
 		}),
 		BullModule.forRootAsync({
 			imports: [ConfigModule],
@@ -110,4 +95,3 @@ export class AppModule implements NestModule {
 		consumer.apply(AppLoggerMiddleware).forRoutes('*');
 	}
 }
-// export class AppModule {}

@@ -24,7 +24,7 @@ export enum UserStatus {
 	DEACTIVATED = 'DEACTIVATED',
 }
 
-@Entity({ name: 'users' })
+@Entity('users')
 export class User extends BaseEntity {
 	@PrimaryGeneratedColumn()
 	id: number;
@@ -35,7 +35,7 @@ export class User extends BaseEntity {
 	@Column()
 	email: string;
 
-	@Column()
+	@Column({ nullable: true })
 	password: string;
 
 	@Column({ default: '' })
@@ -44,7 +44,7 @@ export class User extends BaseEntity {
 	@Column({ default: '' })
 	facebookId: string;
 
-	@Column({ type: 'timestamptz' })
+	@Column({ type: 'timestamptz', default: null, nullable: true })
 	lastOnline: Date;
 
 	@Column({ type: 'enum', enum: UserStatus, default: UserStatus.PENDING })

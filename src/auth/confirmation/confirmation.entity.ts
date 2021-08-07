@@ -14,7 +14,7 @@ export enum ConfirmationType {
 	resetPassword = 'RESET_PASSWORD',
 }
 
-@Entity({ name: 'confirmations' })
+@Entity('confirmations')
 export class Confirmation extends BaseEntity {
 	@PrimaryGeneratedColumn()
 	id: number;

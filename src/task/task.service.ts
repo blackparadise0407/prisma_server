@@ -11,8 +11,8 @@ export class TaskService {
 	@Cron('0 0 * * * *')
 	async handleRemoveExpiredConfirmation() {
 		const currentDate = moment().add(15, 'minutes').toDate();
-		await this.confirmationService.deleteMany({
-			expiredAt: { $lt: currentDate },
-		});
+		// await this.confirmationService.deleteMany({
+		// 	expiredAt: { $lt: currentDate },
+		// });
 	}
 }

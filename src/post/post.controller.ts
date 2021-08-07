@@ -47,7 +47,7 @@ export class PostController {
 		description: 'Get posts',
 	})
 	async get(@User('id') userId: string) {
-		const posts = await this.postService.findAll({}, ['photos', 'userId']);
-		return new GeneralResponse({ data: posts });
+		// const posts = await this.postService.findAll({}, ['photos', 'userId']);
+		// return new GeneralResponse({ data: posts });
 	}
 }

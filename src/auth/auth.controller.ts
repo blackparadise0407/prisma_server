@@ -298,9 +298,9 @@ export class AuthController {
 			);
 		}
 
-		const resetCode = await this.resetPasswordService.createResetCode(
-			user._id.toString(),
-		);
+		const resetCode = await this.confirmationService.createResetPasswordCode({
+			userId: user.id,
+		});
 
 		const url = `${this.configService.get(
 			'client',
@@ -318,7 +318,9 @@ export class AuthController {
 		@Body() body: CreateNewPasswordDTO,
 	) {
 		const { code } = query;
-		const resetDoc = await this.resetPasswordService.findOne({ code });
+		const resetDoc = await this.confirmationService.findOne(null, {
+			where: { code },
+		});
 		if (!resetDoc) {
 			throw new BadRequestException('Reset password code is invalid');
 		}
@@ -336,11 +338,10 @@ export class AuthController {
 		if (user.email !== body.email) {
 			throw new BadRequestException('Email address does not match');
 		}
-
-		user.set({ password: body.password });
+		user.password = body.password;
 		await user.save();
 
-		await this.resetPasswordService.delete({ _id: resetDoc._id });
+		await this.confirmationService.delete(resetDoc.id);
 
 		return new GeneralResponse({
 			message: 'Your password has been successfully reset',
@@ -377,8 +378,8 @@ export class AuthController {
 		if (!body.refreshToken) {
 			throw new BadRequestException('Refresh token is required');
 		}
-		const refreshToken = await this.tokenService.findOne({
-			value: body.refreshToken,
+		const refreshToken = await this.tokenService.findOne(null, {
+			where: { value: body.refreshToken },
 		});
 		if (!refreshToken) {
 			throw new BadRequestException('Refresh token is invalid');
