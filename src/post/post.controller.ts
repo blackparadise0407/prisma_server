@@ -9,11 +9,12 @@ import {
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { Types } from 'mongoose';
+import { plainToClass } from 'class-transformer';
 import { User } from 'src/common/decorators/user.decorator';
 import { GeneralResponse } from 'src/common/responses/general-response';
 import { PostCreateDTO } from './dto/create-post.dto';
 import { PostService } from './post.service';
+import { Post as PostEntity } from './post.entity';
 
 @ApiTags('post')
 @Controller('post')
@@ -29,10 +30,8 @@ export class PostController {
 		description: 'Create new post wiht content or photos',
 	})
 	async create(@User('id') userId: string, @Body() body: PostCreateDTO) {
-		const post = await this.postService.create({
-			...body,
-			userId: Types.ObjectId(userId),
-		});
+		const post = plainToClass(PostEntity, { ...body, userId });
+		await this.postService.create(post);
 		return new GeneralResponse({
 			data: post,
 		});
@@ -46,8 +45,10 @@ export class PostController {
 		summary: 'Get posts',
 		description: 'Get posts',
 	})
-	async get(@User('id') userId: string) {
-		// const posts = await this.postService.findAll({}, ['photos', 'userId']);
-		// return new GeneralResponse({ data: posts });
+	async get() {
+		const posts = await this.postService.findAll({
+			relations: ['user'],
+		});
+		return new GeneralResponse({ data: posts });
 	}
 }

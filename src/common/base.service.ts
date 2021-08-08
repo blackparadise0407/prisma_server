@@ -1,4 +1,5 @@
 import { InternalServerErrorException } from '@nestjs/common';
+import { plainToClass } from 'class-transformer';
 import { LoggerService } from 'src/logger/logger.service';
 import {
 	BaseEntity,
@@ -18,7 +19,7 @@ export class BaseService<T extends BaseEntity, R extends Repository<T>> {
 		this.logger = logger;
 	}
 
-	findAll(opt: FindManyOptions = {}): Promise<T[]> {
+	findAll(opt: FindManyOptions<T> = {}): Promise<T[]> {
 		try {
 			return this.repository.find(opt);
 		} catch (e) {
@@ -67,7 +68,7 @@ export class BaseService<T extends BaseEntity, R extends Repository<T>> {
 		}
 	}
 
-	async delete(crit: EntityId | FindConditions<T> | any): Promise<boolean> {
+	async delete(crit: EntityId | FindConditions<T>): Promise<boolean> {
 		const result = await this.repository.delete(crit);
 		if (result.affected > 0) {
 			return true;

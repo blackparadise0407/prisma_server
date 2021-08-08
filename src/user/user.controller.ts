@@ -16,9 +16,10 @@ import { ConfirmationService } from 'src/auth/confirmation/confirmation.service'
 import { GeneralResponse } from 'src/common/responses/general-response';
 import { MailService } from 'src/mail/mail.service';
 import { CreateUserDTO } from './dto/create-user.dto';
-import { User as UserEntity } from './user.entity';
+import { User as UserEntity, UserStatus } from './user.entity';
 import { User } from 'src/common/decorators/user.decorator';
 import { UserService } from './user.service';
+import { classToPlain, plainToClass } from 'class-transformer';
 
 @Controller('user')
 export class UserController {
@@ -37,18 +38,35 @@ export class UserController {
 		@Ip() ip: string,
 		@Body() body: CreateUserDTO,
 	): Promise<GeneralResponse> {
+		console.log(body);
 		const { email } = body;
 		const existingUser = await this.userService.findOne(null, {
 			where: { email },
 		});
 		if (existingUser) {
-			throw new BadRequestException('Email address already in use');
+			if (existingUser.status === UserStatus.VERIFIED) {
+				throw new BadRequestException('Email address already in use');
+			}
+			const existedConfirmationCode = await this.confirmationService.findAll({
+				where: { userId: existingUser.id },
+			});
+			if (!existedConfirmationCode.length) {
+				const code = await this.confirmationService.createConfirmationCode({
+					userId: existingUser.id,
+				});
+				await this.mailService.sendUserConfirmation(existingUser, code);
+				throw new BadRequestException(
+					'A new confirmation link has been sent to your email address',
+				);
+			} else {
+				throw new BadRequestException(
+					'A confirmation link has already been sent to your email address',
+				);
+			}
 		}
-		const data = new UserEntity();
-		data.email = body.email;
-		data.username = body.username;
-		data.password = body.password;
-		const user = await this.userService.create(data);
+		const newUser = plainToClass(UserEntity, body);
+
+		const user = await this.userService.create(newUser);
 		const code = await this.confirmationService.createConfirmationCode({
 			userId: user.id,
 		});

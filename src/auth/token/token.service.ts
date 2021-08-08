@@ -1,11 +1,13 @@
 import {
 	BadRequestException,
+	ForbiddenException,
 	Injectable,
 	NotFoundException,
 	UnauthorizedException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
+import { plainToClass } from 'class-transformer';
 import { randomBytes } from 'crypto';
 import { Algorithm, sign, SignOptions, verify } from 'jsonwebtoken';
 import * as moment from 'moment';
@@ -34,6 +36,9 @@ export class TokenService extends BaseService<
 		refresh = false,
 		ignoreExpiration = false,
 	): JwtPayload {
+		if (!token) {
+			throw new UnauthorizedException();
+		}
 		try {
 			return verify(
 				token,
@@ -49,9 +54,9 @@ export class TokenService extends BaseService<
 			) as JwtPayload;
 		} catch (e) {
 			if (e.message === 'jwt expired') {
-				throw new UnauthorizedException('Token expired');
+				throw new ForbiddenException('Token expired');
 			}
-			throw new UnauthorizedException('Invalid token');
+			throw new ForbiddenException('Invalid token');
 		}
 	}
 
@@ -84,13 +89,15 @@ export class TokenService extends BaseService<
 	}): Promise<string> {
 		const { userId, ipAddress } = tokenContent;
 		const secret = randomBytes(64).toString('hex');
-		const token = new RefreshToken();
-		token.userId = userId;
-		token.value = secret;
-		token.ipAddress = ipAddress;
-		token.expiredAt = moment()
-			.add(this.configService.get<number>('jwt.refresh.ttl'), 'seconds')
-			.toDate();
+
+		const token = plainToClass(RefreshToken, {
+			userId,
+			value: secret,
+			ipAddress,
+			expiredAt: moment()
+				.add(this.configService.get<number>('jwt.refresh.ttl'), 'seconds')
+				.toDate(),
+		});
 
 		const refreshToken = await this.create(token);
 		return refreshToken.value;
@@ -119,7 +126,7 @@ export class TokenService extends BaseService<
 		return accessToken;
 	}
 
-	async revokeTokenForUser(userId: string) {
-		await this.delete({ where: { userId } });
+	async revokeTokenForUser(userId: number) {
+		await this.delete({ userId });
 	}
 }

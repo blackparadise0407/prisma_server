@@ -16,6 +16,7 @@ import { RefreshToken } from 'src/auth/token/refresh-token.entity';
 import { Attachment } from 'src/attachment/attachment.entity';
 import { Confirmation } from 'src/auth/confirmation/confirmation.entity';
 import { Post } from 'src/post/post.entity';
+import { Exclude } from 'class-transformer';
 const SALT_ROUND = 10;
 
 export enum UserStatus {
@@ -23,7 +24,6 @@ export enum UserStatus {
 	PENDING = 'PENDING',
 	DEACTIVATED = 'DEACTIVATED',
 }
-
 @Entity('users')
 export class User extends BaseEntity {
 	@PrimaryGeneratedColumn()
@@ -35,6 +35,7 @@ export class User extends BaseEntity {
 	@Column()
 	email: string;
 
+	@Exclude({ toPlainOnly: true })
 	@Column({ nullable: true })
 	password: string;
 
@@ -81,6 +82,7 @@ export class User extends BaseEntity {
 
 	@BeforeInsert()
 	async beforeInsert() {
+		console.log(this);
 		const salt = await bcrypt.genSalt(SALT_ROUND);
 		this.password = await bcrypt.hash(this.password, salt);
 	}
