@@ -19,7 +19,7 @@ import { CreateUserDTO } from './dto/create-user.dto';
 import { User as UserEntity, UserStatus } from './user.entity';
 import { User } from 'src/common/decorators/user.decorator';
 import { UserService } from './user.service';
-import { classToPlain, plainToClass } from 'class-transformer';
+import { plainToClass } from 'class-transformer';
 
 @Controller('user')
 export class UserController {

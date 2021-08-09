@@ -4,6 +4,7 @@ import {
 	Controller,
 	Get,
 	HttpStatus,
+	Logger,
 	Post,
 	UseGuards,
 } from '@nestjs/common';

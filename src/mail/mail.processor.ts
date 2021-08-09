@@ -48,8 +48,7 @@ export class MailProcessor {
 		const url = AppModule.isDev
 			? this.configService.get('host') + '/api/auth/confirmation?code=' + code
 			: `${this.configService.get('host')}:${this.configService.get('post')}` +
-			  '/api/auth/confirmation?code=' +
-			  code;
+			  `/api/auth/confirmation?code=${code}`;
 		try {
 			await this.mailerService.sendMail({
 				to: user.email,

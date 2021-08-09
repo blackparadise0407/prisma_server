@@ -140,21 +140,19 @@ export class AuthController {
 				'Confirmation link is invalid or you has already confirm your account',
 			);
 		}
+
+		const user = await this.userService.findById(confirmation.userId);
+		if (!user) {
+			throw new BadRequestException(
+				'Confirmation link is invalid or you has already confirm your account',
+			);
+		}
+		if (user.status === 'VERIFIED') {
+			throw new BadRequestException('You has already confirm your account');
+		}
+
 		const currentDate = new Date();
 		if (confirmation.expiredAt < currentDate) {
-			const user = await this.userService.findById(
-				confirmation.userId.toString(),
-			);
-			if (!user) {
-				throw new BadRequestException(
-					'Confirmation link is invalid or you has already confirm your account',
-				);
-			}
-
-			if (user.status === 'VERIFIED') {
-				throw new BadRequestException('You has already confirm your account');
-			}
-
 			const code = await this.confirmationService.createConfirmationCode({
 				userId: user.id,
 			});
@@ -171,7 +169,8 @@ export class AuthController {
 			});
 
 			await this.cachingService.delete(code);
-			const redirectUrl = this.configService.get('client') + '/login';
+			const redirectUrl =
+				this.configService.get('client') + `/login?email=${user.email}`;
 			res.redirect(redirectUrl);
 		}
 	}
