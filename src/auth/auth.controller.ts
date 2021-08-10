@@ -22,6 +22,7 @@ import {
 } from '@nestjs/swagger';
 import axios from 'axios';
 import * as bluebird from 'bluebird';
+import { plainToClass } from 'class-transformer';
 import { Request, Response } from 'express';
 import { filter } from 'lodash';
 import { CachingService } from 'src/caching/caching.service';
@@ -36,6 +37,9 @@ import { ConfirmationService } from './confirmation/confirmation.service';
 import { GoogleLoginDTO, LoginInputDTO } from './dto/login-input.dto';
 import { CreateNewPasswordDTO, ResetPasswordDTO } from './dto/reset-input.dto';
 import { TokenService } from './token/token.service';
+import { User as UserEntity } from 'src/user/user.entity';
+import { AttachmentService } from 'src/attachment/attachment.service';
+import { Attachment, AttachmentType } from 'src/attachment/attachment.entity';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -47,6 +51,7 @@ export class AuthController {
 		private readonly mailService: MailService,
 		private readonly confirmationService: ConfirmationService,
 		private readonly configService: ConfigService,
+		private readonly attachmentService: AttachmentService,
 		private readonly cachingService: CachingService,
 	) {}
 
@@ -56,7 +61,10 @@ export class AuthController {
 	@ApiResponse({ status: HttpStatus.BAD_REQUEST, type: BadRequestException })
 	async login(@Ip() ip, @Body() body: LoginInputDTO) {
 		const { email, password } = body;
-		const user = await this.userService.findOne(null, { where: { email } });
+		const user = await this.userService.findOne(null, {
+			where: { email },
+			join: { alias: 'user', leftJoinAndSelect: { avatar: 'user.avatar' } },
+		});
 		if (!user) {
 			throw new BadRequestException(
 				'The email address or password you entered is incorrect',
@@ -203,12 +211,20 @@ export class AuthController {
 			const body: GoogleLoginDTO = {
 				username: data.name,
 				email: data.email,
-				avatar: data.picture,
 				googleId: data.sub,
 			};
-			existingUser = await this.userService.create({
-				...body,
-				status: 'VERIFIED',
+			const saveData = plainToClass(UserEntity, body);
+			saveData.status = UserStatus.VERIFIED;
+			existingUser = await this.userService.create(saveData);
+			const attachment = plainToClass(Attachment, {
+				size: 0,
+				url: data.picture,
+				type: AttachmentType.image,
+				createdById: existingUser.id,
+			} as Attachment);
+			const savedAttachment = await this.attachmentService.create(attachment);
+			await this.userService.update(existingUser.id, {
+				avatar: savedAttachment,
 			});
 		}
 
@@ -356,8 +372,8 @@ export class AuthController {
 	@ApiBearerAuth()
 	@ApiResponse({ status: HttpStatus.OK })
 	@ApiResponse({ status: HttpStatus.BAD_REQUEST, type: BadRequestException })
-	async logout(@User() user) {
-		await this.tokenService.revokeTokenForUser(user.id);
+	async logout(@User('sub') id: number) {
+		await this.tokenService.revokeTokenForUser(id);
 		return new GeneralResponse({});
 	}
 

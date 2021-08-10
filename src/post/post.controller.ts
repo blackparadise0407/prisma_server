@@ -30,7 +30,7 @@ export class PostController {
 		summary: 'Create new post',
 		description: 'Create new post wiht content or photos',
 	})
-	async create(@User('id') userId: string, @Body() body: PostCreateDTO) {
+	async create(@User('sub') userId: number, @Body() body: PostCreateDTO) {
 		const post = plainToClass(PostEntity, { ...body, userId });
 		await this.postService.create(post);
 		return new GeneralResponse({

@@ -2,6 +2,7 @@ import { forwardRef, Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { AttachmentModule } from 'src/attachment/attachment.module';
 import { CachingModule } from 'src/caching/caching.module';
 import { LoggerModule } from 'src/logger/logger.module';
 import { MailModule } from 'src/mail/mail.module';
@@ -21,6 +22,7 @@ import { TokenService } from './token/token.service';
 		ConfigModule,
 		MailModule,
 		CachingModule,
+		AttachmentModule,
 		forwardRef(() => UserModule),
 	],
 	controllers: [AuthController],

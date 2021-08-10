@@ -21,5 +21,6 @@ import { AttachmentService } from './attachment.service';
 	],
 	controllers: [AttachmentController],
 	providers: [AttachmentService, AttachmentProcessor],
+	exports: [AttachmentService],
 })
 export class AttachmentModule {}

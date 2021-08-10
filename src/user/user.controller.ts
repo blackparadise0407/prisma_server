@@ -79,7 +79,9 @@ export class UserController {
 	@ApiOperation({ summary: "Retrieve user's info" })
 	@ApiResponse({ status: HttpStatus.OK })
 	@ApiResponse({ status: HttpStatus.UNAUTHORIZED, type: UnauthorizedException })
-	async info(@User('id') id: string) {
-		return await this.userService.findById(id);
+	async info(@User('sub') id: number) {
+		return await this.userService.findOne(id, {
+			relations: ['avatar'],
+		});
 	}
 }

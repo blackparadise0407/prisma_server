@@ -82,8 +82,9 @@ export class User extends BaseEntity {
 
 	@BeforeInsert()
 	async beforeInsert() {
-		console.log(this);
-		const salt = await bcrypt.genSalt(SALT_ROUND);
-		this.password = await bcrypt.hash(this.password, salt);
+		if (this.password) {
+			const salt = await bcrypt.genSalt(SALT_ROUND);
+			this.password = await bcrypt.hash(this.password, salt);
+		}
 	}
 }
