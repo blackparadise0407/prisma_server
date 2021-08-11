@@ -17,6 +17,7 @@ import { AuthGuard } from '@nestjs/passport';
 import {
 	ApiBearerAuth,
 	ApiOperation,
+	ApiQuery,
 	ApiResponse,
 	ApiTags,
 } from '@nestjs/swagger';
@@ -270,7 +271,7 @@ export class AuthController {
 				'Account with this email address does not exist',
 			);
 		}
-		const code = await this.confirmationService.createResetPasswordCode({
+		const code = await this.confirmationService.createForgetPasswordCode({
 			userId: user.id,
 		});
 		await this.mailService.sendUserForgetPassword(user, code);
@@ -279,7 +280,7 @@ export class AuthController {
 		});
 	}
 
-	@Get('reset')
+	@Get('reset-password')
 	@ApiOperation({ summary: 'Reset link' })
 	@ApiResponse({ status: HttpStatus.OK })
 	@ApiResponse({ status: HttpStatus.BAD_REQUEST, type: BadRequestException })
@@ -296,9 +297,7 @@ export class AuthController {
 			throw new BadRequestException('Reset password code is invalid');
 		}
 
-		const user = await this.userService.findById(
-			confirmation.userId.toString(),
-		);
+		const user = await this.userService.findById(confirmation.userId);
 		if (!user) {
 			throw new BadRequestException('User does not exist');
 		}
@@ -308,6 +307,7 @@ export class AuthController {
 				userId: user.id,
 			});
 			await this.mailService.sendUserForgetPassword(user, code);
+			await this.confirmationService.delete(confirmation.id);
 			throw new BadRequestException(
 				'Reset password link has expired. A new link has been sent to you email address',
 			);
@@ -324,17 +324,13 @@ export class AuthController {
 		res.redirect(url);
 	}
 
-	@Post('reset')
+	@Post('reset-password')
 	@ApiOperation({ summary: 'Reset user password' })
 	@ApiResponse({ status: HttpStatus.OK })
 	@ApiResponse({ status: HttpStatus.BAD_REQUEST, type: BadRequestException })
-	async reset(
-		@Query() query: { code: string },
-		@Body() body: CreateNewPasswordDTO,
-	) {
-		const { code } = query;
+	async reset(@Body() body: CreateNewPasswordDTO) {
 		const resetDoc = await this.confirmationService.findOne(null, {
-			where: { code },
+			where: { code: body.code },
 		});
 		if (!resetDoc) {
 			throw new BadRequestException('Reset password code is invalid');
@@ -345,16 +341,14 @@ export class AuthController {
 			throw new BadRequestException('Reset password expired');
 		}
 
-		const user = await this.userService.findById(resetDoc.userId.toString());
+		const user = await this.userService.findById(resetDoc.userId);
 		if (!user) {
 			throw new BadRequestException('User does not exist');
 		}
-
-		if (user.email !== body.email) {
-			throw new BadRequestException('Email address does not match');
+		if (body.password !== body.confirm_password) {
+			throw new BadRequestException('Passwords do not match');
 		}
-		user.password = body.password;
-		await user.save();
+		await this.userService.update(user.id, { password: body.password });
 
 		await this.confirmationService.delete(resetDoc.id);
 

@@ -8,12 +8,15 @@ export class ResetPasswordDTO {
 }
 
 export class CreateNewPasswordDTO {
-	@IsNotEmpty({ message: 'Email address is required' })
-	@IsEmail({}, { message: 'Invalid email address' })
+	@IsNotEmpty({ message: 'Reset code is required' })
 	@ApiProperty()
-	readonly email?: string;
+	readonly code?: string;
 
 	@IsNotEmpty({ message: 'Password is required' })
 	@ApiProperty()
 	readonly password?: string;
+
+	@IsNotEmpty({ message: 'Confirm password is required' })
+	@ApiProperty()
+	readonly confirm_password?: string;
 }

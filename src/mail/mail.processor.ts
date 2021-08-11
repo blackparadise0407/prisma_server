@@ -72,9 +72,9 @@ export class MailProcessor {
 		const { user, code } = job.data;
 
 		const url = AppModule.isDev
-			? this.configService.get('host') + '/api/auth/reset?code=' + code
+			? this.configService.get('host') + '/api/auth/reset-password?code=' + code
 			: `${this.configService.get('host')}:${this.configService.get('post')}` +
-			  '/api/auth/reset?code=' +
+			  '/api/auth/reset-password?code=' +
 			  code;
 
 		try {

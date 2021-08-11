@@ -1,6 +1,7 @@
 import {
 	BaseEntity,
 	BeforeInsert,
+	BeforeUpdate,
 	Column,
 	CreateDateColumn,
 	Entity,
@@ -82,6 +83,14 @@ export class User extends BaseEntity {
 
 	@BeforeInsert()
 	async beforeInsert() {
+		if (this.password) {
+			const salt = await bcrypt.genSalt(SALT_ROUND);
+			this.password = await bcrypt.hash(this.password, salt);
+		}
+	}
+
+	@BeforeUpdate()
+	async beforeUpdate() {
 		if (this.password) {
 			const salt = await bcrypt.genSalt(SALT_ROUND);
 			this.password = await bcrypt.hash(this.password, salt);

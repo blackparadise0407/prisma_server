@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
+import { plainToClass } from 'class-transformer';
 import { randomBytes } from 'crypto';
 import * as moment from 'moment';
 import { BaseService } from 'src/common/base.service';
@@ -23,24 +24,45 @@ export class ConfirmationService extends BaseService<
 	}
 
 	async createConfirmationCode(payload: ConfirmationInputDTO): Promise<string> {
-		payload.expiredAt = moment()
-			.add(this.configService.get<number>('confirmation.ttl'), 's')
-			.toDate();
-		payload.code = randomBytes(16).toString('hex');
-		payload.type = ConfirmationType.emailConfirm;
-		const confirmation = await this.create(payload);
+		const confirmation = plainToClass(Confirmation, {
+			...payload,
+			expiredAt: moment()
+				.add(this.configService.get<number>('confirmation.ttl'), 's')
+				.toDate(),
+			code: randomBytes(16).toString('hex'),
+			type: ConfirmationType.emailConfirm,
+		});
+		await this.create(confirmation);
+		return confirmation.code;
+	}
+
+	async createForgetPasswordCode(
+		payload: ConfirmationInputDTO,
+	): Promise<string> {
+		const confirmation = plainToClass(Confirmation, {
+			...payload,
+			expiredAt: moment()
+				.add(this.configService.get<number>('confirmation.ttl'), 's')
+				.toDate(),
+			code: randomBytes(16).toString('hex'),
+			type: ConfirmationType.forgetPassword,
+		});
+		await this.create(confirmation);
 		return confirmation.code;
 	}
 
 	async createResetPasswordCode(
 		payload: ConfirmationInputDTO,
 	): Promise<string> {
-		payload.expiredAt = moment()
-			.add(this.configService.get<number>('confirmation.ttl'), 's')
-			.toDate();
-		payload.code = randomBytes(16).toString('hex');
-		payload.type = ConfirmationType.resetPassword;
-		const confirmation = await this.create(payload);
-		return confirmation.code;
+		const resetPasswordCode = plainToClass(Confirmation, {
+			...payload,
+			expiredAt: moment()
+				.add(this.configService.get<number>('confirmation.ttl'), 's')
+				.toDate(),
+			code: randomBytes(16).toString('hex'),
+			type: ConfirmationType.resetPassword,
+		});
+		await this.create(resetPasswordCode);
+		return resetPasswordCode.code;
 	}
 }
