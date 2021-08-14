@@ -5,6 +5,7 @@ import {
 	Column,
 	CreateDateColumn,
 	Entity,
+	Index,
 	JoinColumn,
 	OneToMany,
 	OneToOne,
@@ -30,10 +31,11 @@ export class User extends BaseEntity {
 	@PrimaryGeneratedColumn()
 	id: number;
 
+	@Index()
 	@Column()
 	username: string;
 
-	@Column()
+	@Column({ unique: true })
 	email: string;
 
 	@Exclude({ toPlainOnly: true })

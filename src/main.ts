@@ -3,6 +3,7 @@ import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as helmet from 'helmet';
 import { AppModule } from './app.module';
+import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { JSONInterceptor } from './common/interceptors/json.interceptor';
 
 async function bootstrap() {
@@ -43,6 +44,9 @@ async function bootstrap() {
 
 	// Convert to JSON
 	app.useGlobalInterceptors(new JSONInterceptor());
+
+	// Filter HTTP exceptions
+	app.useGlobalFilters(new HttpExceptionFilter());
 
 	await app.listen(AppModule.port);
 

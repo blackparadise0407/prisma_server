@@ -1,6 +1,5 @@
 import { forwardRef, Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { JwtModule } from '@nestjs/jwt';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AttachmentModule } from 'src/attachment/attachment.module';
 import { CachingModule } from 'src/caching/caching.module';

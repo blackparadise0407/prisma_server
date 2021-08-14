@@ -3,6 +3,7 @@ import { plainToClass } from 'class-transformer';
 import { LoggerService } from 'src/logger/logger.service';
 import {
 	BaseEntity,
+	DeepPartial,
 	FindConditions,
 	FindManyOptions,
 	FindOneOptions,
@@ -19,7 +20,16 @@ export class BaseService<T extends BaseEntity, R extends Repository<T>> {
 		this.logger = logger;
 	}
 
-	findAll(opt: FindManyOptions<T> = {}): Promise<T[]> {
+	public save(entity: DeepPartial<T>): Promise<T> {
+		try {
+			return this.repository.save(entity);
+		} catch (e) {
+			this.logger.error(e.message);
+			throw new InternalServerErrorException();
+		}
+	}
+
+	public findAll(opt: FindManyOptions<T> = {}): Promise<T[]> {
 		try {
 			return this.repository.find(opt);
 		} catch (e) {
@@ -28,7 +38,7 @@ export class BaseService<T extends BaseEntity, R extends Repository<T>> {
 		}
 	}
 
-	findOne(id: EntityId, opt: FindOneOptions<T> = {}): Promise<T> {
+	public findOne(id: EntityId, opt: FindOneOptions<T> = {}): Promise<T> {
 		try {
 			return this.repository.findOne(id, opt);
 		} catch (e) {
@@ -37,7 +47,7 @@ export class BaseService<T extends BaseEntity, R extends Repository<T>> {
 		}
 	}
 
-	findById(id: EntityId): Promise<T> {
+	public findById(id: EntityId): Promise<T> {
 		try {
 			return this.repository.findOne(id);
 		} catch (e) {
@@ -46,7 +56,7 @@ export class BaseService<T extends BaseEntity, R extends Repository<T>> {
 		}
 	}
 
-	create(data: any): Promise<T> {
+	public create(data: any): Promise<T> {
 		try {
 			return this.repository.save(data);
 		} catch (e) {
@@ -55,7 +65,7 @@ export class BaseService<T extends BaseEntity, R extends Repository<T>> {
 		}
 	}
 
-	async update(
+	public async update(
 		crit: EntityId | FindConditions<T>,
 		data: QueryDeepPartialEntity<T>,
 	): Promise<T> {
@@ -68,7 +78,7 @@ export class BaseService<T extends BaseEntity, R extends Repository<T>> {
 		}
 	}
 
-	async delete(crit: EntityId | FindConditions<T>): Promise<boolean> {
+	public async delete(crit: EntityId | FindConditions<T>): Promise<boolean> {
 		const result = await this.repository.delete(crit);
 		if (result.affected > 0) {
 			return true;

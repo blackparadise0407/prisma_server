@@ -17,7 +17,6 @@ import { AuthGuard } from '@nestjs/passport';
 import {
 	ApiBearerAuth,
 	ApiOperation,
-	ApiQuery,
 	ApiResponse,
 	ApiTags,
 } from '@nestjs/swagger';
@@ -26,11 +25,13 @@ import * as bluebird from 'bluebird';
 import { plainToClass } from 'class-transformer';
 import { Request, Response } from 'express';
 import { filter } from 'lodash';
+import { Attachment, AttachmentType } from 'src/attachment/attachment.entity';
+import { AttachmentService } from 'src/attachment/attachment.service';
 import { CachingService } from 'src/caching/caching.service';
 import { User } from 'src/common/decorators/user.decorator';
 import { GeneralResponse } from 'src/common/responses/general-response';
 import { MailService } from 'src/mail/mail.service';
-import { UserStatus } from 'src/user/user.entity';
+import { User as UserEntity, UserStatus } from 'src/user/user.entity';
 import { UserService } from 'src/user/user.service';
 import { AuthService } from './auth.service';
 import { ConfirmationType } from './confirmation/confirmation.entity';
@@ -38,9 +39,6 @@ import { ConfirmationService } from './confirmation/confirmation.service';
 import { GoogleLoginDTO, LoginInputDTO } from './dto/login-input.dto';
 import { CreateNewPasswordDTO, ResetPasswordDTO } from './dto/reset-input.dto';
 import { TokenService } from './token/token.service';
-import { User as UserEntity } from 'src/user/user.entity';
-import { AttachmentService } from 'src/attachment/attachment.service';
-import { Attachment, AttachmentType } from 'src/attachment/attachment.entity';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -348,7 +346,8 @@ export class AuthController {
 		if (body.password !== body.confirm_password) {
 			throw new BadRequestException('Passwords do not match');
 		}
-		await this.userService.update(user.id, { password: body.password });
+		user.password = body.password;
+		await this.userService.save(user);
 
 		await this.confirmationService.delete(resetDoc.id);
 
@@ -371,7 +370,6 @@ export class AuthController {
 		return new GeneralResponse({});
 	}
 
-	// @UseGuards(AuthGuard('jwt'))
 	@Post('refresh-token')
 	@ApiOperation({
 		summary: 'Refresh token',
@@ -385,13 +383,13 @@ export class AuthController {
 		@Body() body: { refreshToken?: string },
 	) {
 		if (!body.refreshToken) {
-			throw new BadRequestException('Refresh token is required');
+			throw new UnauthorizedException();
 		}
 		const refreshToken = await this.tokenService.findOne(null, {
 			where: { value: body.refreshToken },
 		});
 		if (!refreshToken) {
-			throw new BadRequestException('Refresh token is invalid');
+			throw new UnauthorizedException();
 		}
 
 		const oldAccessToken = headers.authorization.split(' ')[1];

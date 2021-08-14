@@ -21,7 +21,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
 			}
 		}
 
-		// Manage errors from class-vlidator
+		// Manage errors from class-validator
 		if (
 			Array.isArray(error.response.message) &&
 			error.response.message.length > 0 &&
@@ -36,14 +36,12 @@ export class HttpExceptionFilter implements ExceptionFilter {
 		}
 
 		res.status(error.getStatus()).json({
-			error: {
-				statusCode: error.getStatus(),
-				error: error.response.name || error.response.error || error.name,
-				message: error.response.message || error.response || error.message,
-				errors: error.response.errors || null,
-				timestamp: new Date().toISOString(),
-				path: req ? req.url : null,
-			},
+			statusCode: error.getStatus(),
+			error: error.response.name || error.response.error || error.name,
+			message: error.response.message || error.response || error.message,
+			errors: error.response.errors || null,
+			timestamp: new Date().toISOString(),
+			path: req ? req.url : null,
 		});
 	}
 }
