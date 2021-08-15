@@ -1,3 +1,4 @@
+import { UserAction } from 'src/user/user-action/user-action.entity';
 import { User } from 'src/user/user.entity';
 import {
 	BaseEntity,
@@ -22,6 +23,9 @@ export class Post extends BaseEntity {
 	@Column()
 	userId: number;
 
+	@Column({ default: 0 })
+	reactionCount: number;
+
 	@CreateDateColumn()
 	createdAt: Date;
 
@@ -33,4 +37,7 @@ export class Post extends BaseEntity {
 
 	@OneToMany(() => Photo, (photo) => photo.post)
 	photos: Photo[];
+
+	@OneToMany(() => UserAction, (action) => action.post)
+	userActions: UserAction[];
 }

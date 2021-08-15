@@ -11,7 +11,7 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { AuthGuard } from '@nestjs/passport';
-import { ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ConfirmationService } from 'src/auth/confirmation/confirmation.service';
 import { GeneralResponse } from 'src/common/responses/general-response';
 import { MailService } from 'src/mail/mail.service';
@@ -20,7 +20,9 @@ import { User as UserEntity, UserStatus } from './user.entity';
 import { User } from 'src/common/decorators/user.decorator';
 import { UserService } from './user.service';
 import { plainToClass } from 'class-transformer';
+import { ReactPostDTO } from './dto/react-post.dto';
 
+@ApiTags('user')
 @Controller('user')
 export class UserController {
 	constructor(
@@ -83,5 +85,15 @@ export class UserController {
 		return await this.userService.findOne(id, {
 			relations: ['avatar'],
 		});
+	}
+
+	@UseGuards(AuthGuard('jwt'))
+	@Post('react-entity')
+	@ApiOperation({ summary: 'React to entity' })
+	@ApiResponse({ status: HttpStatus.OK })
+	@ApiResponse({ status: HttpStatus.UNAUTHORIZED, type: UnauthorizedException })
+	@ApiResponse({ status: HttpStatus.BAD_REQUEST, type: BadRequestException })
+	async reactEntity(@User('sub') userId: number, @Body() body: ReactPostDTO) {
+		return await this.userService.reactEntity(userId, body);
 	}
 }

@@ -1,4 +1,5 @@
 import { Attachment } from 'src/attachment/attachment.entity';
+import { UserAction } from 'src/user/user-action/user-action.entity';
 import { User } from 'src/user/user.entity';
 import {
 	BaseEntity,
@@ -6,6 +7,7 @@ import {
 	Entity,
 	JoinColumn,
 	ManyToOne,
+	OneToMany,
 	OneToOne,
 	PrimaryGeneratedColumn,
 } from 'typeorm';
@@ -18,6 +20,9 @@ export class Photo extends BaseEntity {
 
 	@Column()
 	content: string;
+
+	@Column({ default: 0 })
+	reactionCount: number;
 
 	@Column()
 	userId: number;
@@ -38,4 +43,7 @@ export class Photo extends BaseEntity {
 	@OneToOne(() => Attachment, (attachment) => attachment.id)
 	@JoinColumn()
 	attachment: Attachment;
+
+	@OneToMany(() => UserAction, (action) => action.photo)
+	userActions: UserAction[];
 }

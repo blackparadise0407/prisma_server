@@ -18,7 +18,7 @@ const connectionOptions: ConnectionOptions = {
 	password: config.password,
 	database: config.database,
 	entities: ['dist/**/*.entity.js'],
-	synchronize: false,
+	synchronize: true,
 	migrations: [getMigrationDirectory()],
 	cli: {
 		migrationsDir: 'src/migrations',

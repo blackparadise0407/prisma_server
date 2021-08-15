@@ -19,6 +19,7 @@ import { Attachment } from 'src/attachment/attachment.entity';
 import { Confirmation } from 'src/auth/confirmation/confirmation.entity';
 import { Post } from 'src/post/post.entity';
 import { Exclude } from 'class-transformer';
+import { UserAction } from './user-action/user-action.entity';
 const SALT_ROUND = 10;
 
 export enum UserStatus {
@@ -82,6 +83,10 @@ export class User extends BaseEntity {
 	@OneToMany(() => Post, (post) => post.user)
 	@JoinColumn()
 	post: Post[];
+
+	@OneToMany(() => UserAction, (action) => action.userId)
+	@JoinColumn()
+	userActions: UserAction[];
 
 	@BeforeInsert()
 	async beforeInsert() {
