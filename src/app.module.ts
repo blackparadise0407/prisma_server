@@ -1,13 +1,11 @@
 import { BullModule } from '@nestjs/bull';
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { GraphQLModule } from '@nestjs/graphql';
 import { ScheduleModule } from '@nestjs/schedule';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import connectionOptions from 'ormconfig';
 import { join } from 'path';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { AttachmentModule } from './attachment/attachment.module';
 import { AuthModule } from './auth/auth.module';
 import { CachingModule } from './caching/caching.module';
@@ -26,36 +24,20 @@ import { UserModule } from './user/user.module';
 			envFilePath: ['.env', '.prod.env'],
 			load: [configuration],
 		}),
-		TypeOrmModule.forRootAsync({
-			imports: [ConfigModule],
-			useFactory: (configService: ConfigService) => ({
-				type: 'postgres',
-				host: configService.get('database.host'),
-				port: configService.get<number>('database.port'),
-				username: configService.get('database.username'),
-				password: configService.get('database.password'),
-				database: configService.get('database.name'),
-				entities: ['dist/**/*.entity.js'],
-				synchronize: false,
-				// cli: {
-				// 	migrationsDir: 'src/migrations',
-				// },
-			}),
-			inject: [ConfigService],
-		}),
-		GraphQLModule.forRootAsync({
-			imports: [ConfigModule],
-			inject: [ConfigService],
-			useFactory: async (configService: ConfigService) => ({
-				debug: false,
-				playground: true,
-				autoSchemaFile: 'schema.gql',
-				cors: {
-					origin: configService.get<string>('cors.origin'),
-					credentials: true,
-				},
-			}),
-		}),
+		TypeOrmModule.forRoot(connectionOptions),
+		// GraphQLModule.forRootAsync({
+		// 	imports: [ConfigModule],
+		// 	inject: [ConfigService],
+		// 	useFactory: async (configService: ConfigService) => ({
+		// 		debug: false,
+		// 		playground: true,
+		// 		autoSchemaFile: 'schema.gql',
+		// 		cors: {
+		// 			origin: configService.get<string>('cors.origin'),
+		// 			credentials: true,
+		// 		},
+		// 	}),
+		// }),
 		BullModule.forRootAsync({
 			imports: [ConfigModule],
 			useFactory: (configService: ConfigService) => ({
@@ -81,8 +63,7 @@ import { UserModule } from './user/user.module';
 		CloudinaryModule,
 		ProfileModule,
 	],
-	controllers: [AppController],
-	providers: [AppService, TaskService],
+	providers: [TaskService],
 })
 export class AppModule implements NestModule {
 	static isDev: boolean;

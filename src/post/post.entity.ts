@@ -2,10 +2,12 @@ import { User } from 'src/user/user.entity';
 import {
 	BaseEntity,
 	Column,
+	CreateDateColumn,
 	Entity,
 	ManyToOne,
 	OneToMany,
 	PrimaryGeneratedColumn,
+	UpdateDateColumn,
 } from 'typeorm';
 import { Photo } from './photo/photo.entity';
 
@@ -19,6 +21,12 @@ export class Post extends BaseEntity {
 
 	@Column()
 	userId: number;
+
+	@CreateDateColumn()
+	createdAt: Date;
+
+	@UpdateDateColumn()
+	updatedAt: Date;
 
 	@ManyToOne(() => User, (user) => user.post)
 	user: User;

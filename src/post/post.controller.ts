@@ -47,7 +47,7 @@ export class PostController {
 	})
 	async get() {
 		const posts = await this.postService.findAll({
-			relations: ['user'],
+			relations: ['user', 'user.avatar'],
 		});
 		return new GeneralResponse({ data: posts });
 	}
