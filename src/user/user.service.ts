@@ -56,11 +56,12 @@ export class UserService extends BaseService<User, UserRepository> {
 				{ userId, photoId: entity.id },
 			],
 		});
+
 		if (!reaction) {
 			const newReaction = plainToClass(UserAction, {
 				userId,
 				type: UserActionType.REACTION,
-				reactionType: ReactionType.LIKE,
+				reactionType: payload.reactionType,
 				postId: entity.id,
 			} as UserAction);
 			await this.userActionRepo.save(newReaction);
@@ -68,10 +69,16 @@ export class UserService extends BaseService<User, UserRepository> {
 				reactionCount: entity.reactionCount + 1,
 			});
 		} else {
-			await this.userActionRepo.delete(reaction.id);
-			await this.postService.update(entity.id, {
-				reactionCount: entity.reactionCount - 1,
-			});
+			if (reaction.reactionType !== payload.reactionType) {
+				await this.userActionRepo.update(reaction.id, {
+					reactionType: payload.reactionType,
+				});
+			} else {
+				await this.userActionRepo.delete(reaction.id);
+				await this.postService.update(entity.id, {
+					reactionCount: entity.reactionCount - 1,
+				});
+			}
 		}
 	}
 }

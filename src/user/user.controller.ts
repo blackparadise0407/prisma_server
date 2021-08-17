@@ -94,6 +94,7 @@ export class UserController {
 	@ApiResponse({ status: HttpStatus.UNAUTHORIZED, type: UnauthorizedException })
 	@ApiResponse({ status: HttpStatus.BAD_REQUEST, type: BadRequestException })
 	async reactEntity(@User('sub') userId: number, @Body() body: ReactPostDTO) {
-		return await this.userService.reactEntity(userId, body);
+		await this.userService.reactEntity(userId, body);
+		return new GeneralResponse({});
 	}
 }

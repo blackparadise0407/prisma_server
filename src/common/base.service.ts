@@ -20,6 +20,10 @@ export class BaseService<T extends BaseEntity, R extends Repository<T>> {
 		this.logger = logger;
 	}
 
+	// public get() {
+	// 	return this.repository;
+	// }
+
 	public save(entity: DeepPartial<T>): Promise<T> {
 		try {
 			return this.repository.save(entity);
