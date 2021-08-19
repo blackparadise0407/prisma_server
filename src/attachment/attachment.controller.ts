@@ -16,7 +16,7 @@ import { plainToClass } from 'class-transformer';
 import { Request } from 'express';
 import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 import { User } from 'src/common/decorators/user.decorator';
-import { GeneralResponse } from 'src/common/responses/general-response';
+import { GeneralResponse } from 'src/common/general-response';
 import { Attachment, AttachmentType } from './attachment.entity';
 import { AttachmentService } from './attachment.service';
 import { multetOpts } from './multer.config';

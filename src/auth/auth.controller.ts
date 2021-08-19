@@ -29,7 +29,7 @@ import { Attachment, AttachmentType } from 'src/attachment/attachment.entity';
 import { AttachmentService } from 'src/attachment/attachment.service';
 import { CachingService } from 'src/caching/caching.service';
 import { User } from 'src/common/decorators/user.decorator';
-import { GeneralResponse } from 'src/common/responses/general-response';
+import { GeneralResponse } from 'src/common/general-response';
 import { MailService } from 'src/mail/mail.service';
 import { User as UserEntity, UserStatus } from 'src/user/user.entity';
 import { UserService } from 'src/user/user.service';

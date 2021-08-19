@@ -10,11 +10,7 @@ import { Post } from 'src/post/post.entity';
 import { PostService } from 'src/post/post.service';
 import { Repository } from 'typeorm';
 import { ReactPostDTO } from './dto/react-post.dto';
-import {
-	ReactionType,
-	UserAction,
-	UserActionType,
-} from './user-action/user-action.entity';
+import { UserAction, UserActionType } from './user-action/user-action.entity';
 import { User } from './user.entity';
 import { UserRepository } from './user.repository';
 

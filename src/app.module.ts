@@ -4,7 +4,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import connectionOptions from 'ormconfig';
+import connectionOptions from './config/orm.config';
 import { join } from 'path';
 import { AttachmentModule } from './attachment/attachment.module';
 import { AuthModule } from './auth/auth.module';
@@ -25,19 +25,6 @@ import { UserModule } from './user/user.module';
 			load: [configuration],
 		}),
 		TypeOrmModule.forRoot(connectionOptions),
-		// GraphQLModule.forRootAsync({
-		// 	imports: [ConfigModule],
-		// 	inject: [ConfigService],
-		// 	useFactory: async (configService: ConfigService) => ({
-		// 		debug: false,
-		// 		playground: true,
-		// 		autoSchemaFile: 'schema.gql',
-		// 		cors: {
-		// 			origin: configService.get<string>('cors.origin'),
-		// 			credentials: true,
-		// 		},
-		// 	}),
-		// }),
 		BullModule.forRootAsync({
 			imports: [ConfigModule],
 			useFactory: (configService: ConfigService) => ({

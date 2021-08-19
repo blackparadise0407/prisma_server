@@ -13,7 +13,7 @@ import { ConfigService } from '@nestjs/config';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ConfirmationService } from 'src/auth/confirmation/confirmation.service';
-import { GeneralResponse } from 'src/common/responses/general-response';
+import { GeneralResponse } from 'src/common/general-response';
 import { MailService } from 'src/mail/mail.service';
 import { CreateUserDTO } from './dto/create-user.dto';
 import { User as UserEntity, UserStatus } from './user.entity';

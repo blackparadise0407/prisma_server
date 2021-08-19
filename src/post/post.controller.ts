@@ -5,16 +5,18 @@ import {
 	Get,
 	HttpStatus,
 	Post,
+	Query,
 	UseGuards,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { plainToClass } from 'class-transformer';
 import { User } from 'src/common/decorators/user.decorator';
-import { GeneralResponse } from 'src/common/responses/general-response';
+import { GeneralResponse } from 'src/common/general-response';
 import { PostCreateDTO } from './dto/create-post.dto';
 import { PostService } from './post.service';
 import { Post as PostEntity } from './post.entity';
+import { GeneralQueryDTO } from 'src/common/dto/shared.dto';
 
 @ApiTags('post')
 @Controller('post')
@@ -45,10 +47,8 @@ export class PostController {
 		summary: 'Get posts',
 		description: 'Get posts',
 	})
-	async get() {
-		const posts = await this.postService.findAll({
-			relations: ['user', 'user.avatar'],
-		});
+	async get(@Query() query: GeneralQueryDTO) {
+		const posts = await this.postService.findAllWithQuery(query);
 		return new GeneralResponse({ data: posts });
 	}
 }

@@ -1,5 +1,4 @@
 import { InternalServerErrorException } from '@nestjs/common';
-import { plainToClass } from 'class-transformer';
 import { LoggerService } from 'src/logger/logger.service';
 import {
 	BaseEntity,
@@ -20,9 +19,9 @@ export class BaseService<T extends BaseEntity, R extends Repository<T>> {
 		this.logger = logger;
 	}
 
-	// public get() {
-	// 	return this.repository;
-	// }
+	public get(): R {
+		return this.repository;
+	}
 
 	public save(entity: DeepPartial<T>): Promise<T> {
 		try {
