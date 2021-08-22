@@ -1,16 +1,15 @@
 import { Module } from '@nestjs/common';
-
-import { Post } from './post.entity';
-import { PostService } from './post.service';
-import { PostController } from './post.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { LoggerModule } from 'src/logger/logger.module';
-import { Photo } from './photo/photo.entity';
+import { UserAction } from 'src/user/user-action/user-action.entity';
+import { PostController } from './post.controller';
+import { Post } from './post.entity';
 import { PostRepository } from './post.repository';
+import { PostService } from './post.service';
 
 @Module({
 	imports: [
-		TypeOrmModule.forFeature([Post, Photo, PostRepository]),
+		TypeOrmModule.forFeature([Post, UserAction, PostRepository]),
 		LoggerModule,
 	],
 	controllers: [PostController],

@@ -29,7 +29,7 @@ export class PostController {
 	@ApiResponse({ status: HttpStatus.BAD_REQUEST, type: BadRequestException })
 	@ApiOperation({
 		summary: 'Create new post',
-		description: 'Create new post wiht content or photos',
+		description: 'Create new post with content or photos',
 	})
 	async create(@User('sub') userId: number, @Body() body: PostCreateDTO) {
 		const post = plainToClass(PostEntity, { ...body, userId });
@@ -48,7 +48,13 @@ export class PostController {
 		description: 'Get posts',
 	})
 	async get(@Query() query: GeneralQueryDTO) {
-		const posts = await this.postService.findAllWithQuery(query);
-		return new GeneralResponse({ data: posts });
+		const [posts, total] = await this.postService.findAllWithQuery(query);
+		return new GeneralResponse({ data: { posts, total } });
 	}
+
+	@UseGuards(AuthGuard('jwt'))
+	@Get('comment')
+	@ApiResponse({ status: HttpStatus.OK })
+	@ApiResponse({ status: HttpStatus.BAD_REQUEST, type: BadRequestException })
+	async getComment() {}
 }

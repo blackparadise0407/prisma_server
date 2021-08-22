@@ -5,7 +5,7 @@ import { plainToClass } from 'class-transformer';
 import { BaseService } from 'src/common/base.service';
 import { EntityType } from 'src/common/enums';
 import { LoggerService } from 'src/logger/logger.service';
-import { Photo } from 'src/post/photo/photo.entity';
+import { Photo } from 'src/photo/photo.entity';
 import { Post } from 'src/post/post.entity';
 import { PostService } from 'src/post/post.service';
 import { Repository } from 'typeorm';

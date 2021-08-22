@@ -1,4 +1,4 @@
-import { Photo } from 'src/post/photo/photo.entity';
+import { Photo } from 'src/photo/photo.entity';
 import { Post } from 'src/post/post.entity';
 import {
 	BaseEntity,
@@ -19,6 +19,7 @@ export enum UserActionType {
 export enum ReactionType {
 	LIKE = 'LIKE',
 	LOVE = 'LOVE',
+	HAHA = 'HAHA',
 	WOW = 'WOW',
 	ANGER = 'ANGER',
 	SAD = 'SAD',
@@ -52,7 +53,7 @@ export class UserAction extends BaseEntity {
 	@Column({ nullable: true })
 	photoId: number;
 
-	@ManyToOne(() => Post, (post) => post.userActions)
+	@ManyToOne(() => Photo, (photo) => photo.userActions)
 	@JoinColumn({ name: 'photoId' })
 	photo: Photo;
 }

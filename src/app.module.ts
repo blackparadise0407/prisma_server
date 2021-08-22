@@ -18,6 +18,7 @@ import { PostModule } from './post/post.module';
 import { ProfileModule } from './profile/profile.module';
 import { TaskService } from './task/task.service';
 import { UserModule } from './user/user.module';
+import { PhotoModule } from './photo/photo.module';
 @Module({
 	imports: [
 		ConfigModule.forRoot({
@@ -49,6 +50,7 @@ import { UserModule } from './user/user.module';
 		AttachmentModule,
 		CloudinaryModule,
 		ProfileModule,
+		PhotoModule,
 	],
 	providers: [TaskService],
 })

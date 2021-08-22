@@ -1,38 +1,22 @@
+import { BaseSocialEntity } from 'src/common/base.entity';
 import { UserAction } from 'src/user/user-action/user-action.entity';
 import { User } from 'src/user/user.entity';
 import {
-	BaseEntity,
-	Column,
-	CreateDateColumn,
 	Entity,
+	JoinColumn,
 	ManyToOne,
 	OneToMany,
 	PrimaryGeneratedColumn,
-	UpdateDateColumn,
 } from 'typeorm';
-import { Photo } from './photo/photo.entity';
+import { Photo } from '../photo/photo.entity';
 
 @Entity('posts')
-export class Post extends BaseEntity {
+export class Post extends BaseSocialEntity {
 	@PrimaryGeneratedColumn()
 	id: number;
 
-	@Column()
-	content: string;
-
-	@Column()
-	userId: number;
-
-	@Column({ default: 0 })
-	reactionCount: number;
-
-	@CreateDateColumn()
-	createdAt: Date;
-
-	@UpdateDateColumn()
-	updatedAt: Date;
-
-	@ManyToOne(() => User, (user) => user.post)
+	@ManyToOne(() => User, (user) => user.posts)
+	@JoinColumn({ name: 'userId' })
 	user: User;
 
 	@OneToMany(() => Photo, (photo) => photo.post)

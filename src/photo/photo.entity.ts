@@ -1,8 +1,8 @@
 import { Attachment } from 'src/attachment/attachment.entity';
+import { BaseSocialEntity } from 'src/common/base.entity';
 import { UserAction } from 'src/user/user-action/user-action.entity';
 import { User } from 'src/user/user.entity';
 import {
-	BaseEntity,
 	Column,
 	Entity,
 	JoinColumn,
@@ -11,23 +11,14 @@ import {
 	OneToOne,
 	PrimaryGeneratedColumn,
 } from 'typeorm';
-import { Post } from '../post.entity';
+import { Post } from '../post/post.entity';
 
 @Entity('photos')
-export class Photo extends BaseEntity {
+export class Photo extends BaseSocialEntity {
 	@PrimaryGeneratedColumn()
 	id: number;
 
-	@Column()
-	content: string;
-
-	@Column({ default: 0 })
-	reactionCount: number;
-
-	@Column()
-	userId: number;
-
-	@ManyToOne(() => User, (user) => user.id)
+	@ManyToOne(() => User, (user) => user.photos)
 	@JoinColumn({ name: 'userId' })
 	user: User;
 

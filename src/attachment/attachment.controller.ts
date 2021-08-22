@@ -2,6 +2,7 @@ import { InjectQueue } from '@nestjs/bull';
 import {
 	BadRequestException,
 	Controller,
+	HttpStatus,
 	Post,
 	Req,
 	UploadedFile,
@@ -10,11 +11,17 @@ import {
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ApiTags } from '@nestjs/swagger';
+import {
+	ApiConsumes,
+	ApiOperation,
+	ApiResponse,
+	ApiTags,
+} from '@nestjs/swagger';
 import { Queue } from 'bull';
 import { plainToClass } from 'class-transformer';
 import { Request } from 'express';
 import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
+import { ApiFile } from 'src/common/decorators/api-file.decorator';
 import { User } from 'src/common/decorators/user.decorator';
 import { GeneralResponse } from 'src/common/general-response';
 import { Attachment, AttachmentType } from './attachment.entity';
@@ -32,6 +39,14 @@ export class AttachmentController {
 
 	@UseGuards(AuthGuard('jwt'))
 	@Post('image')
+	@ApiConsumes('multipart/form-data')
+	@ApiFile('file')
+	@ApiResponse({ status: HttpStatus.OK })
+	@ApiResponse({ status: HttpStatus.BAD_REQUEST, type: BadRequestException })
+	@ApiOperation({
+		summary: 'Upload attachment',
+		description: 'Upload new attachment',
+	})
 	@UseInterceptors(FileInterceptor('file', multetOpts(AttachmentType.image)))
 	async uploadImage(
 		@User('id') userId: number,
