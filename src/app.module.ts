@@ -19,6 +19,7 @@ import { ProfileModule } from './profile/profile.module';
 import { TaskService } from './task/task.service';
 import { UserModule } from './user/user.module';
 import { PhotoModule } from './photo/photo.module';
+import { AppGateway } from './app.gateway';
 @Module({
 	imports: [
 		ConfigModule.forRoot({
@@ -52,7 +53,7 @@ import { PhotoModule } from './photo/photo.module';
 		ProfileModule,
 		PhotoModule,
 	],
-	providers: [TaskService],
+	providers: [AppGateway, TaskService],
 })
 export class AppModule implements NestModule {
 	static isDev: boolean;
