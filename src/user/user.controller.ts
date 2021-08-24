@@ -20,7 +20,7 @@ import { User as UserEntity, UserStatus } from './user.entity';
 import { User } from 'src/common/decorators/user.decorator';
 import { UserService } from './user.service';
 import { plainToClass } from 'class-transformer';
-import { ReactPostDTO } from './dto/react-post.dto';
+import { ReactPostDTO } from './dto/user-action.dto';
 
 @ApiTags('user')
 @Controller('user')

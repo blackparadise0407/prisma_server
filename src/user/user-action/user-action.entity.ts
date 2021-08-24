@@ -3,6 +3,7 @@ import { Post } from 'src/post/post.entity';
 import {
 	BaseEntity,
 	Column,
+	CreateDateColumn,
 	Entity,
 	JoinColumn,
 	ManyToOne,
@@ -35,6 +36,9 @@ export class UserAction extends BaseEntity {
 
 	@Column({ type: 'enum', enum: ReactionType, nullable: true })
 	reactionType: ReactionType;
+
+	@CreateDateColumn()
+	createdAt: Date;
 
 	@Column()
 	userId: number;

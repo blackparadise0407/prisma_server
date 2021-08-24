@@ -4,6 +4,7 @@ import {
 	Controller,
 	Get,
 	HttpStatus,
+	Param,
 	Post,
 	Query,
 	UseGuards,
@@ -13,7 +14,7 @@ import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { plainToClass } from 'class-transformer';
 import { User } from 'src/common/decorators/user.decorator';
 import { GeneralResponse } from 'src/common/general-response';
-import { PostCreateDTO } from './dto/create-post.dto';
+import { GetCommentByPostDTO, PostCreateDTO } from './dto/post.dto';
 import { PostService } from './post.service';
 import { Post as PostEntity } from './post.entity';
 import { GeneralQueryDTO } from 'src/common/dto/shared.dto';
@@ -53,8 +54,32 @@ export class PostController {
 	}
 
 	@UseGuards(AuthGuard('jwt'))
-	@Get('comment')
+	@Get(':postId/comments')
 	@ApiResponse({ status: HttpStatus.OK })
 	@ApiResponse({ status: HttpStatus.BAD_REQUEST, type: BadRequestException })
-	async getComment() {}
+	async getCommentByPost(
+		@Query() query: GeneralQueryDTO,
+		@Param('postId') postId: number,
+	) {
+		console.log(postId);
+		const [comments, total] = await this.postService.getCommentByPostId(
+			postId,
+			query,
+		);
+		return new GeneralResponse({
+			data: {
+				comments,
+				total,
+			},
+		});
+	}
+
+	@UseGuards(AuthGuard('jwt'))
+	@Get(':postId')
+	@ApiResponse({ status: HttpStatus.OK })
+	@ApiResponse({ status: HttpStatus.BAD_REQUEST, type: BadRequestException })
+	async getPostById(@Param('postId') postId: number) {
+		const post = await this.postService.findById(postId);
+		return new GeneralResponse({ data: post });
+	}
 }

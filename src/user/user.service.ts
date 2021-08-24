@@ -9,7 +9,7 @@ import { Photo } from 'src/photo/photo.entity';
 import { Post } from 'src/post/post.entity';
 import { PostService } from 'src/post/post.service';
 import { Repository } from 'typeorm';
-import { ReactPostDTO } from './dto/react-post.dto';
+import { ReactPostDTO } from './dto/user-action.dto';
 import { UserAction, UserActionType } from './user-action/user-action.entity';
 import { User } from './user.entity';
 import { UserRepository } from './user.repository';
@@ -77,4 +77,6 @@ export class UserService extends BaseService<User, UserRepository> {
 			}
 		}
 	}
+
+	async commentPostById(userId: number, postId: number) {}
 }
