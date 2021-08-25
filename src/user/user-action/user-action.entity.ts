@@ -37,6 +37,9 @@ export class UserAction extends BaseEntity {
 	@Column({ type: 'enum', enum: ReactionType, nullable: true })
 	reactionType: ReactionType;
 
+	@Column({ nullable: true })
+	content: string;
+
 	@CreateDateColumn()
 	createdAt: Date;
 

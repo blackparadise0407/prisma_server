@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { forEach, groupBy, map, orderBy, reduce } from 'lodash';
+import { forEach, groupBy, map, reduce } from 'lodash';
 import { BaseService } from 'src/common/base.service';
 import { GeneralQueryDTO } from 'src/common/dto/shared.dto';
 import { LoggerService } from 'src/logger/logger.service';
@@ -92,6 +92,7 @@ export class PostService extends BaseService<Post, PostRepository> {
 				postId,
 				type: UserActionType.COMMENT,
 			},
+			join: { alias: 'actions', leftJoinAndSelect: { user: 'actions.user' } },
 			order: { createdAt: 'DESC' },
 			take: limit,
 			skip,

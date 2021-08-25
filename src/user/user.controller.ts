@@ -20,7 +20,7 @@ import { User as UserEntity, UserStatus } from './user.entity';
 import { User } from 'src/common/decorators/user.decorator';
 import { UserService } from './user.service';
 import { plainToClass } from 'class-transformer';
-import { ReactPostDTO } from './dto/user-action.dto';
+import { CommentPostDTO, ReactPostDTO } from './dto/user-action.dto';
 
 @ApiTags('user')
 @Controller('user')
@@ -95,6 +95,20 @@ export class UserController {
 	@ApiResponse({ status: HttpStatus.BAD_REQUEST, type: BadRequestException })
 	async reactEntity(@User('sub') userId: number, @Body() body: ReactPostDTO) {
 		await this.userService.reactEntity(userId, body);
+		return new GeneralResponse({});
+	}
+
+	@UseGuards(AuthGuard('jwt'))
+	@Post('comment-entity')
+	@ApiOperation({ summary: 'Comment to entity' })
+	@ApiResponse({ status: HttpStatus.OK })
+	@ApiResponse({ status: HttpStatus.UNAUTHORIZED, type: UnauthorizedException })
+	@ApiResponse({ status: HttpStatus.BAD_REQUEST, type: BadRequestException })
+	async commentEntity(
+		@User('sub') userId: number,
+		@Body() body: CommentPostDTO,
+	) {
+		await this.userService.commentEntityById(userId, body);
 		return new GeneralResponse({});
 	}
 }

@@ -9,7 +9,7 @@ import { Photo } from 'src/photo/photo.entity';
 import { Post } from 'src/post/post.entity';
 import { PostService } from 'src/post/post.service';
 import { Repository } from 'typeorm';
-import { ReactPostDTO } from './dto/user-action.dto';
+import { CommentPostDTO, ReactPostDTO } from './dto/user-action.dto';
 import { UserAction, UserActionType } from './user-action/user-action.entity';
 import { User } from './user.entity';
 import { UserRepository } from './user.repository';
@@ -78,5 +78,31 @@ export class UserService extends BaseService<User, UserRepository> {
 		}
 	}
 
-	async commentEntityById(userId: number, postId: number) {}
+	async commentEntityById(
+		userId: number,
+		payload: CommentPostDTO,
+	): Promise<void> {
+		const { entityType, entityId, content } = payload;
+		let entity: Post | Photo;
+		switch (entityType) {
+			case EntityType.POST:
+				entity = (await this.postService.findById(entityId)) as Post;
+				break;
+			default:
+				break;
+		}
+		if (!entity) {
+			throw new BadRequestException('Entity not found');
+		}
+		const userActions = plainToClass(UserAction, {
+			userId,
+			content,
+			postId: entity.id,
+			type: UserActionType.COMMENT,
+		} as UserAction);
+		await userActions.save();
+		await this.postService.update(entity.id, {
+			commentCount: entity.commentCount + 1,
+		});
+	}
 }
