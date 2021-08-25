@@ -60,8 +60,6 @@ export class PostService extends BaseService<Post, PostRepository> {
 			'',
 		);
 
-		console.log(postIdsConditions);
-
 		const actions = await this.userActionRepo.query(
 			`select count(u."id"), u."reactionType", u."postId" from user_actions u where ${postIdsConditions} group by u."reactionType", u."postId"`,
 		);

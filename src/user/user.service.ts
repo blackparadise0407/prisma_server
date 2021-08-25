@@ -78,5 +78,5 @@ export class UserService extends BaseService<User, UserRepository> {
 		}
 	}
 
-	async commentPostById(userId: number, postId: number) {}
+	async commentEntityById(userId: number, postId: number) {}
 }

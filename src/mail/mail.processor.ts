@@ -45,10 +45,8 @@ export class MailProcessor {
 		job: Job<{ user: User; code: string }>,
 	): Promise<any> {
 		const { user, code } = job.data;
-		const url = AppModule.isDev
-			? this.configService.get('host') + '/api/auth/confirmation?code=' + code
-			: `${this.configService.get('host')}:${this.configService.get('post')}` +
-			  `/api/auth/confirmation?code=${code}`;
+		const url =
+			this.configService.get('host') + '/api/auth/confirmation?code=' + code;
 		try {
 			await this.mailerService.sendMail({
 				to: user.email,
@@ -71,11 +69,8 @@ export class MailProcessor {
 	): Promise<any> {
 		const { user, code } = job.data;
 
-		const url = AppModule.isDev
-			? this.configService.get('host') + '/api/auth/reset-password?code=' + code
-			: `${this.configService.get('host')}:${this.configService.get('post')}` +
-			  '/api/auth/reset-password?code=' +
-			  code;
+		const url =
+			this.configService.get('host') + '/api/auth/reset-password?code=' + code;
 
 		try {
 			await this.mailerService.sendMail({
