@@ -173,17 +173,7 @@ export class AuthController {
 	@ApiResponse({ status: HttpStatus.OK })
 	@ApiResponse({ status: HttpStatus.BAD_REQUEST, type: BadRequestException })
 	async forgetPassword(@Body() body: ResetPasswordDTO) {
-		const { email } = body;
-		const user = await this.userService.findOne(null, { where: { email } });
-		if (!user) {
-			throw new BadRequestException(
-				'Account with this email address does not exist',
-			);
-		}
-		const code = await this.confirmationService.createForgetPasswordCode({
-			userId: user.id,
-		});
-		await this.mailService.sendUserForgetPassword(user, code);
+		await this.authService.handleForgetPassword(body);
 		return new GeneralResponse({
 			message: 'An reset password link has been sent to your email address',
 		});
@@ -193,43 +183,12 @@ export class AuthController {
 	@ApiOperation({ summary: 'Reset link' })
 	@ApiResponse({ status: HttpStatus.OK })
 	@ApiResponse({ status: HttpStatus.BAD_REQUEST, type: BadRequestException })
-	async getResetLink(@Query() query: { code: string }, @Res() res: Response) {
+	async getResetPassword(
+		@Query() query: { code: string },
+		@Res() res: Response,
+	) {
 		const { code } = query;
-		const confirmation = await this.confirmationService.findOne(null, {
-			where: {
-				code,
-				type: ConfirmationType.forgetPassword,
-			},
-		});
-
-		if (!confirmation) {
-			throw new BadRequestException('Reset password code is invalid');
-		}
-
-		const user = await this.userService.findById(confirmation.userId);
-		if (!user) {
-			throw new BadRequestException('User does not exist');
-		}
-		const currentDate = new Date();
-		if (confirmation.expiredAt < currentDate) {
-			const code = await this.confirmationService.createResetPasswordCode({
-				userId: user.id,
-			});
-			await this.mailService.sendUserForgetPassword(user, code);
-			await this.confirmationService.delete(confirmation.id);
-			throw new BadRequestException(
-				'Reset password link has expired. A new link has been sent to you email address',
-			);
-		}
-
-		const resetCode = await this.confirmationService.createResetPasswordCode({
-			userId: user.id,
-		});
-
-		const url = `${this.configService.get(
-			'client',
-		)}/reset-password?code=${resetCode}`;
-
+		const url = await this.authService.getResetLink(code);
 		res.redirect(url);
 	}
 
@@ -237,7 +196,7 @@ export class AuthController {
 	@ApiOperation({ summary: 'Reset user password' })
 	@ApiResponse({ status: HttpStatus.OK })
 	@ApiResponse({ status: HttpStatus.BAD_REQUEST, type: BadRequestException })
-	async reset(@Body() body: CreateNewPasswordDTO) {
+	async handleResetPassword(@Body() body: CreateNewPasswordDTO) {
 		const resetDoc = await this.confirmationService.findOne(null, {
 			where: { code: body.code },
 		});

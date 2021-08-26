@@ -5,8 +5,10 @@ import { filter } from 'lodash';
 import { MailService } from 'src/mail/mail.service';
 import { User, UserStatus } from 'src/user/user.entity';
 import { UserService } from 'src/user/user.service';
+import { ConfirmationType } from './confirmation/confirmation.entity';
 import { ConfirmationService } from './confirmation/confirmation.service';
 import { LoginInputDTO } from './dto/login-input.dto';
+import { ResetPasswordDTO } from './dto/reset-input.dto';
 import { TokenService } from './token/token.service';
 
 @Injectable()
@@ -18,7 +20,7 @@ export class AuthService {
 		private readonly mailService: MailService,
 		private readonly configService: ConfigService,
 	) {}
-	async login(
+	public async login(
 		payload: LoginInputDTO,
 		ipAddress: string,
 	): Promise<{ user: User; accessToken: string; refreshToken: string }> {
@@ -92,7 +94,7 @@ export class AuthService {
 		};
 	}
 
-	async verifyConfirmation(
+	public async verifyConfirmation(
 		code: string,
 	): Promise<{ status: boolean; redirectUrl: string }> {
 		const confirmation = await this.confirmationService.findOne(null, {
@@ -132,5 +134,56 @@ export class AuthService {
 				this.configService.get('client') + `/login?email=${user.email}`;
 			return { status: true, redirectUrl };
 		}
+	}
+
+	public async handleForgetPassword(payload: ResetPasswordDTO): Promise<void> {
+		const { email } = payload;
+		const user = await this.userService.findOne(null, { where: { email } });
+		if (!user) {
+			throw new BadRequestException(
+				'Account with this email address does not exist',
+			);
+		}
+		const code = await this.confirmationService.createForgetPasswordCode({
+			userId: user.id,
+		});
+		await this.mailService.sendUserForgetPassword(user, code);
+	}
+
+	public async getResetLink(code: string): Promise<string> {
+		const confirmation = await this.confirmationService.findOne(null, {
+			where: {
+				code,
+				type: ConfirmationType.forgetPassword,
+			},
+		});
+
+		if (!confirmation) {
+			throw new BadRequestException('Reset password code is invalid');
+		}
+
+		const user = await this.userService.findById(confirmation.userId);
+		if (!user) {
+			throw new BadRequestException('User does not exist');
+		}
+		const currentDate = new Date();
+		if (confirmation.expiredAt < currentDate) {
+			const code = await this.confirmationService.createResetPasswordCode({
+				userId: user.id,
+			});
+			await this.mailService.sendUserForgetPassword(user, code);
+			await this.confirmationService.delete(confirmation.id);
+			throw new BadRequestException(
+				'Reset password link has expired. A new link has been sent to you email address',
+			);
+		}
+
+		const resetCode = await this.confirmationService.createResetPasswordCode({
+			userId: user.id,
+		});
+
+		return `${this.configService.get(
+			'client',
+		)}/reset-password?code=${resetCode}`;
 	}
 }
