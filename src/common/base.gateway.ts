@@ -10,8 +10,8 @@ import { Server, Socket } from 'socket.io';
 export abstract class BaseGateway
 	implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
 {
-	private logger: Logger = new Logger('AppGateway');
-	@WebSocketServer() wss: Server;
+	protected logger: Logger = new Logger('AppGateway');
+	@WebSocketServer() protected readonly wss: Server;
 
 	afterInit(server: Server) {
 		this.logger.log('[Connection initialized] .....');

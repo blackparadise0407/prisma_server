@@ -58,71 +58,11 @@ export class AuthController {
 	@ApiOperation({ summary: 'Login' })
 	@ApiResponse({ status: HttpStatus.OK })
 	@ApiResponse({ status: HttpStatus.BAD_REQUEST, type: BadRequestException })
-	async login(@Ip() ip, @Body() body: LoginInputDTO) {
-		const { email, password } = body;
-		const user = await this.userService.findOne(null, {
-			where: { email },
-			join: { alias: 'user', leftJoinAndSelect: { avatar: 'user.avatar' } },
-		});
-		if (!user) {
-			throw new BadRequestException(
-				'The email address or password you entered is incorrect',
-			);
-		}
-
-		if (!user.password) {
-			if (user.googleId) {
-				throw new BadRequestException(
-					'The email address you entered is already linked with another account',
-				);
-			}
-		}
-
-		const isValid = await this.userService.comparePassword(
-			password,
-			user.password,
+	async login(@Ip() ip: string, @Body() body: LoginInputDTO) {
+		const { accessToken, refreshToken, user } = await this.authService.login(
+			body,
+			ip,
 		);
-
-		if (!isValid) {
-			throw new BadRequestException(
-				'The email address or password you entered is incorrect',
-			);
-		}
-
-		if (user.status !== 'VERIFIED') {
-			throw new BadRequestException('Your account has not been confirmed yet');
-		}
-
-		const oldRefreshToken = await this.tokenService.findAll({
-			where: { user },
-		});
-
-		if (oldRefreshToken.length > 1) {
-			const otherRefreshToken = filter(
-				oldRefreshToken,
-				(p) => p.ipAddress !== ip,
-			);
-			bluebird.map(otherRefreshToken, async (p) => {
-				await this.tokenService.delete(p.id);
-			});
-		}
-		let refreshToken: string;
-
-		if (oldRefreshToken.length === 1) {
-			refreshToken = await this.tokenService.renewRefreshToken(
-				oldRefreshToken[0].id,
-			);
-		} else {
-			refreshToken = await this.tokenService.createRefreshToken({
-				userId: user.id,
-				ipAddress: ip,
-			});
-		}
-
-		const accessToken = await this.tokenService.createAccessToken({
-			sub: user.id,
-		});
-
 		return new GeneralResponse({
 			data: {
 				accessToken,
@@ -138,47 +78,18 @@ export class AuthController {
 	@ApiResponse({ status: HttpStatus.BAD_REQUEST, type: BadRequestException })
 	async confirm(@Query() query: { code: string }, @Res() res: Response) {
 		const { code } = query;
-		const confirmation = await this.confirmationService.findOne(null, {
-			where: { code },
-		});
-
-		if (!confirmation) {
-			throw new BadRequestException(
-				'Confirmation link is invalid or you has already confirm your account',
-			);
-		}
-
-		const user = await this.userService.findById(confirmation.userId);
-		if (!user) {
-			throw new BadRequestException(
-				'Confirmation link is invalid or you has already confirm your account',
-			);
-		}
-		if (user.status === 'VERIFIED') {
-			throw new BadRequestException('You has already confirm your account');
-		}
-
-		const currentDate = new Date();
-		if (confirmation.expiredAt < currentDate) {
-			const code = await this.confirmationService.createConfirmationCode({
-				userId: user.id,
-			});
-			await this.mailService.sendUserConfirmation(user, code);
+		const { status, redirectUrl } = await this.authService.verifyConfirmation(
+			code,
+		);
+		if (status) {
+			res.redirect(redirectUrl);
+		} else {
 			res.send(
 				new GeneralResponse({
 					message:
 						'Confirmation link has expired. A new confirmation link has been sent to you email address',
 				}),
 			);
-		} else {
-			await this.userService.update(confirmation.userId, {
-				status: UserStatus.VERIFIED,
-			});
-
-			await this.cachingService.delete(code);
-			const redirectUrl =
-				this.configService.get('client') + `/login?email=${user.email}`;
-			res.redirect(redirectUrl);
 		}
 	}
 

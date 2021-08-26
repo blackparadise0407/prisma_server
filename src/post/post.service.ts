@@ -8,6 +8,7 @@ import {
 	UserAction,
 	UserActionType,
 } from 'src/user/user-action/user-action.entity';
+import { User } from 'src/user/user.entity';
 import { Repository } from 'typeorm';
 import { Post } from './post.entity';
 import { PostRepository } from './post.repository';
@@ -97,6 +98,21 @@ export class PostService extends BaseService<Post, PostRepository> {
 			take: limit,
 			skip,
 		});
-		return result;
+		const results = await this.userActionRepo
+			.createQueryBuilder('actions')
+			.leftJoinAndSelect('actions.user', 'user', 'user.id = actions.userId')
+			.leftJoinAndSelect(
+				'user.avatar',
+				'attachment',
+				'user.avatar = attachment.id',
+			)
+			.where('actions.postId = :postId', { postId })
+			.andWhere('actions.type = :type', { type: UserActionType.COMMENT })
+			.orderBy('actions.createdAt', 'DESC')
+			.take(limit)
+			.skip(skip)
+			.getManyAndCount();
+
+		return results;
 	}
 }
