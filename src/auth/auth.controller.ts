@@ -197,30 +197,7 @@ export class AuthController {
 	@ApiResponse({ status: HttpStatus.OK })
 	@ApiResponse({ status: HttpStatus.BAD_REQUEST, type: BadRequestException })
 	async handleResetPassword(@Body() body: CreateNewPasswordDTO) {
-		const resetDoc = await this.confirmationService.findOne(null, {
-			where: { code: body.code },
-		});
-		if (!resetDoc) {
-			throw new BadRequestException('Reset password code is invalid');
-		}
-
-		const currentDate = new Date();
-		if (resetDoc.expiredAt < currentDate) {
-			throw new BadRequestException('Reset password expired');
-		}
-
-		const user = await this.userService.findById(resetDoc.userId);
-		if (!user) {
-			throw new BadRequestException('User does not exist');
-		}
-		if (body.password !== body.confirm_password) {
-			throw new BadRequestException('Passwords do not match');
-		}
-		user.password = body.password;
-		await this.userService.save(user);
-
-		await this.confirmationService.delete(resetDoc.id);
-
+		await this.authService.resetPassword(body);
 		return new GeneralResponse({
 			message: 'Your password has been successfully reset',
 		});
@@ -252,22 +229,11 @@ export class AuthController {
 		@Req() { headers }: Request,
 		@Body() body: { refreshToken?: string },
 	) {
-		if (!body.refreshToken) {
-			throw new UnauthorizedException();
-		}
-		const refreshToken = await this.tokenService.findOne(null, {
-			where: { value: body.refreshToken },
-		});
-		if (!refreshToken) {
-			throw new UnauthorizedException();
-		}
-
 		const oldAccessToken = headers.authorization.split(' ')[1];
-		const accessToken =
-			await this.tokenService.generateAccessTokenFromRefreshToken(
-				refreshToken.value,
-				oldAccessToken,
-			);
+		const accessToken = await this.authService.retrieveAccessToken(
+			oldAccessToken,
+			body.refreshToken,
+		);
 		return new GeneralResponse({
 			data: {
 				accessToken,

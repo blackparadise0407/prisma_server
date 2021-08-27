@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+	BadRequestException,
+	Injectable,
+	UnauthorizedException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { map as bbMap } from 'bluebird';
 import { filter } from 'lodash';
@@ -8,7 +12,7 @@ import { UserService } from 'src/user/user.service';
 import { ConfirmationType } from './confirmation/confirmation.entity';
 import { ConfirmationService } from './confirmation/confirmation.service';
 import { LoginInputDTO } from './dto/login-input.dto';
-import { ResetPasswordDTO } from './dto/reset-input.dto';
+import { CreateNewPasswordDTO, ResetPasswordDTO } from './dto/reset-input.dto';
 import { TokenService } from './token/token.service';
 
 @Injectable()
@@ -185,5 +189,51 @@ export class AuthService {
 		return `${this.configService.get(
 			'client',
 		)}/reset-password?code=${resetCode}`;
+	}
+
+	public async resetPassword(payload: CreateNewPasswordDTO): Promise<void> {
+		const { code, confirm_password, password } = payload;
+		const resetDoc = await this.confirmationService.findOne(null, {
+			where: { code },
+		});
+		if (!resetDoc) {
+			throw new BadRequestException('Reset password code is invalid');
+		}
+
+		const currentDate = new Date();
+		if (resetDoc.expiredAt < currentDate) {
+			throw new BadRequestException('Reset password expired');
+		}
+
+		const user = await this.userService.findById(resetDoc.userId);
+		if (!user) {
+			throw new BadRequestException('User does not exist');
+		}
+		if (password !== confirm_password) {
+			throw new BadRequestException('Passwords do not match');
+		}
+		user.password = password;
+		await this.userService.save(user);
+
+		await this.confirmationService.delete(resetDoc.id);
+	}
+
+	public async retrieveAccessToken(
+		oldAccessToken: string,
+		refreshToken: string,
+	): Promise<string> {
+		if (!refreshToken) {
+			throw new UnauthorizedException();
+		}
+		const existingRefreshToken = await this.tokenService.findOne(null, {
+			where: { value: refreshToken },
+		});
+		if (!existingRefreshToken) {
+			throw new UnauthorizedException();
+		}
+		return await this.tokenService.generateAccessTokenFromRefreshToken(
+			existingRefreshToken.value,
+			oldAccessToken,
+		);
 	}
 }
