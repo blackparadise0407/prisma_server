@@ -8,6 +8,7 @@ import {
 	JoinColumn,
 	ManyToOne,
 	PrimaryGeneratedColumn,
+	UpdateDateColumn,
 } from 'typeorm';
 import { User } from '../user.entity';
 
@@ -42,6 +43,9 @@ export class UserAction extends BaseEntity {
 
 	@CreateDateColumn()
 	createdAt: Date;
+
+	@UpdateDateColumn()
+	updatedAt: Date;
 
 	@Column()
 	userId: number;

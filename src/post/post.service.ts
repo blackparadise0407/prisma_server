@@ -8,7 +8,6 @@ import {
 	UserAction,
 	UserActionType,
 } from 'src/user/user-action/user-action.entity';
-import { User } from 'src/user/user.entity';
 import { Repository } from 'typeorm';
 import { Post } from './post.entity';
 import { PostRepository } from './post.repository';
@@ -84,20 +83,12 @@ export class PostService extends BaseService<Post, PostRepository> {
 	): Promise<[UserAction[], number]> {
 		const limit = query.limit || 0;
 		const skip = (query.page - 1) * query.limit;
+
 		const post = await this.findById(postId);
 		if (!post) {
 			throw new BadRequestException('Post not found');
 		}
-		const result = await this.userActionRepo.findAndCount({
-			where: {
-				postId,
-				type: UserActionType.COMMENT,
-			},
-			join: { alias: 'actions', leftJoinAndSelect: { user: 'actions.user' } },
-			order: { createdAt: 'DESC' },
-			take: limit,
-			skip,
-		});
+
 		const results = await this.userActionRepo
 			.createQueryBuilder('actions')
 			.leftJoinAndSelect('actions.user', 'user', 'user.id = actions.userId')

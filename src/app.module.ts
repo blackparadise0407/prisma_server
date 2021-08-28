@@ -4,22 +4,22 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import connectionOptions from './config/orm.config';
 import { join } from 'path';
+import { AppGateway } from './app.gateway';
 import { AttachmentModule } from './attachment/attachment.module';
 import { AuthModule } from './auth/auth.module';
 import { CachingModule } from './caching/caching.module';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { AppLoggerMiddleware } from './common/middlewares/logger.middleware';
 import configuration from './config/configuration';
+import connectionOptions from './config/orm.config';
 import { LoggerModule } from './logger/logger.module';
 import { MailModule } from './mail/mail.module';
+import { PhotoModule } from './photo/photo.module';
 import { PostModule } from './post/post.module';
 import { ProfileModule } from './profile/profile.module';
 import { TaskService } from './task/task.service';
 import { UserModule } from './user/user.module';
-import { PhotoModule } from './photo/photo.module';
-import { AppGateway } from './app.gateway';
 @Module({
 	imports: [
 		ConfigModule.forRoot({

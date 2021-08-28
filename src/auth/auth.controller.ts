@@ -34,7 +34,6 @@ import { MailService } from 'src/mail/mail.service';
 import { User as UserEntity, UserStatus } from 'src/user/user.entity';
 import { UserService } from 'src/user/user.service';
 import { AuthService } from './auth.service';
-import { ConfirmationType } from './confirmation/confirmation.entity';
 import { ConfirmationService } from './confirmation/confirmation.service';
 import { GoogleLoginDTO, LoginInputDTO } from './dto/login-input.dto';
 import { CreateNewPasswordDTO, ResetPasswordDTO } from './dto/reset-input.dto';
