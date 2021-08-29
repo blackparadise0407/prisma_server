@@ -61,7 +61,6 @@ export class PostController {
 		@Query() query: GeneralQueryDTO,
 		@Param('postId') postId: number,
 	) {
-		console.log(postId);
 		const [comments, total] = await this.postService.getCommentByPostId(
 			postId,
 			query,
@@ -81,5 +80,14 @@ export class PostController {
 	async getPostById(@Param('postId') postId: number) {
 		const post = await this.postService.findById(postId);
 		return new GeneralResponse({ data: post });
+	}
+
+	@UseGuards(AuthGuard('jwt'))
+	@Get(':postId/comments/:commentId/reply')
+	@ApiResponse({ status: HttpStatus.OK })
+	@ApiResponse({ status: HttpStatus.BAD_REQUEST, type: BadRequestException })
+	async getRepliesByCommentId(@Param() { commentId }: { commentId: number }) {
+		const comments = await this.postService.getRepliesByCommentId(commentId);
+		return new GeneralResponse({ data: comments });
 	}
 }

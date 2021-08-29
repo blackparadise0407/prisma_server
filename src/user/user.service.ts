@@ -82,7 +82,7 @@ export class UserService extends BaseService<User, UserRepository> {
 		userId: number,
 		payload: CommentPostDTO,
 	): Promise<void> {
-		const { entityType, entityId, content } = payload;
+		const { entityType, entityId, content, replyToId = null } = payload;
 		let entity: Post | Photo;
 		switch (entityType) {
 			case EntityType.POST:
@@ -99,7 +99,16 @@ export class UserService extends BaseService<User, UserRepository> {
 			content,
 			postId: entity.id,
 			type: UserActionType.COMMENT,
+			replyToId,
 		} as UserAction);
+		if (replyToId) {
+			await this.userActionRepo
+				.createQueryBuilder('user_actions')
+				.update(UserAction)
+				.where('user_actions.id = :replyToId', { replyToId })
+				.set({ replyCount: () => 'user_actions."replyCount" + 1' })
+				.execute();
+		}
 		await userActions.save();
 		await this.postService.update(entity.id, {
 			commentCount: entity.commentCount + 1,

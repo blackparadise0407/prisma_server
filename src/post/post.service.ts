@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+	BadRequestException,
+	Injectable,
+	NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { forEach, groupBy, map, reduce } from 'lodash';
 import { BaseService } from 'src/common/base.service';
@@ -39,7 +43,7 @@ export class PostService extends BaseService<Post, PostRepository> {
 				'posts.userActions',
 				'user_actions',
 				'user_actions.postId = posts.id AND user_actions.type = :type AND user_actions.userId = :userId',
-				{ type: 'REACTION', userId: 2 },
+				{ type: UserActionType.REACTION, userId: 2 },
 			)
 			.orderBy('posts.createdAt', 'DESC')
 			.take(limit)
@@ -61,7 +65,8 @@ export class PostService extends BaseService<Post, PostRepository> {
 		);
 
 		const actions = await this.userActionRepo.query(
-			`select count(u."id"), u."reactionType", u."postId" from user_actions u where ${postIdsConditions} group by u."reactionType", u."postId"`,
+			`select count(u."id"), u."reactionType", u."postId", u."type" from user_actions u where u."type"=$1 and (${postIdsConditions}) group by u."reactionType", u."postId", u."type"`,
+			[UserActionType.REACTION.toString()],
 		);
 		const groupActions = groupBy(actions, 'postId');
 		forEach(groupActions, (i, key) => {
@@ -99,11 +104,25 @@ export class PostService extends BaseService<Post, PostRepository> {
 			)
 			.where('actions.postId = :postId', { postId })
 			.andWhere('actions.type = :type', { type: UserActionType.COMMENT })
+			.andWhere('actions.replyToId IS NULL')
 			.orderBy('actions.createdAt', 'DESC')
 			.take(limit)
 			.skip(skip)
 			.getManyAndCount();
 
+		return results;
+	}
+
+	public async getRepliesByCommentId(commentId: number): Promise<UserAction[]> {
+		const existingComment = await this.userActionRepo.findOne(commentId);
+		if (!existingComment) {
+			throw new NotFoundException('The requested resource not found');
+		}
+
+		const results = await this.userActionRepo.find({
+			where: { replyToId: commentId },
+			relations: ['user', 'user.avatar'],
+		});
 		return results;
 	}
 }

@@ -47,6 +47,16 @@ export class UserAction extends BaseEntity {
 	@UpdateDateColumn()
 	updatedAt: Date;
 
+	@Column({ nullable: true })
+	replyCount: number;
+
+	@Column({ nullable: true })
+	replyToId: number;
+
+	@ManyToOne(() => UserAction, (action) => action.id)
+	@JoinColumn({ name: 'replyToId' })
+	replyTo: UserAction;
+
 	@Column()
 	userId: number;
 

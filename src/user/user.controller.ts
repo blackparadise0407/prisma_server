@@ -40,7 +40,6 @@ export class UserController {
 		@Ip() ip: string,
 		@Body() body: CreateUserDTO,
 	): Promise<GeneralResponse> {
-		console.log(body);
 		const { email } = body;
 		const existingUser = await this.userService.findOne(null, {
 			where: { email },

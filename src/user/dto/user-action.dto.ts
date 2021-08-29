@@ -37,4 +37,7 @@ export class CommentPostDTO {
 	@IsNotEmpty({ message: 'Content is required' })
 	@ApiProperty()
 	readonly content: string;
+
+	@ApiProperty()
+	readonly replyToId: number;
 }
