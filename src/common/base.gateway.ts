@@ -17,9 +17,7 @@ export abstract class BaseGateway
 		this.logger.log('[Connection initialized] .....');
 	}
 
-	handleConnection(client: Socket, ...args: any[]) {
-		this.logger.log(`[Client connected]: ${client.id}`);
-	}
+	abstract handleConnection(client: Socket, ...args: any[]): void;
 
 	handleDisconnect(client: Socket) {
 		this.logger.log(`[Client disconnected]: ${client.id}`);

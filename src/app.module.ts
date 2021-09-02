@@ -16,6 +16,7 @@ import connectionOptions from './config/orm.config';
 import { LoggerModule } from './logger/logger.module';
 import { MailModule } from './mail/mail.module';
 import { PhotoModule } from './photo/photo.module';
+import { PostGateway } from './post/post.gateway';
 import { PostModule } from './post/post.module';
 import { ProfileModule } from './profile/profile.module';
 import { TaskService } from './task/task.service';
@@ -53,7 +54,7 @@ import { UserModule } from './user/user.module';
 		ProfileModule,
 		PhotoModule,
 	],
-	providers: [AppGateway, TaskService],
+	providers: [AppGateway, PostGateway, TaskService],
 })
 export class AppModule implements NestModule {
 	static isDev: boolean;
