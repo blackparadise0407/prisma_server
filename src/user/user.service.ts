@@ -81,7 +81,7 @@ export class UserService extends BaseService<User, UserRepository> {
 	async commentEntityById(
 		userId: number,
 		payload: CommentPostDTO,
-	): Promise<void> {
+	): Promise<UserAction> {
 		const { entityType, entityId, content, replyToId = null } = payload;
 		let entity: Post | Photo;
 		switch (entityType) {
@@ -109,9 +109,10 @@ export class UserService extends BaseService<User, UserRepository> {
 				.set({ replyCount: () => 'user_actions."replyCount" + 1' })
 				.execute();
 		}
-		await userActions.save();
+		const comment = await userActions.save();
 		await this.postService.update(entity.id, {
 			commentCount: entity.commentCount + 1,
 		});
+		return comment;
 	}
 }
