@@ -1,37 +1,26 @@
 import { BullModule } from '@nestjs/bull';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { MongooseModule } from '@nestjs/mongoose';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { CloudinaryModule } from 'src/cloudinary/cloudinary.module';
+import { LoggerModule } from 'src/logger/logger.module';
 import { AttachmentController } from './attachment.controller';
+import { Attachment } from './attachment.entity';
 import { AttachmentProcessor } from './attachment.processor';
-import { Attachment, AttachmentSchema } from './attachment.schema';
 import { AttachmentService } from './attachment.service';
 
 @Module({
 	imports: [
-		MongooseModule.forFeatureAsync([
-			{
-				name: Attachment.name,
-				useFactory: () => {
-					const schema = AttachmentSchema;
-					schema.set('toJSON', {
-						transform: (_, ret: { [key: string]: any }) => {
-							ret.id = ret._id;
-							delete ret._id;
-						},
-					});
-					return schema;
-				},
-			},
-		]),
+		TypeOrmModule.forFeature([Attachment]),
 		BullModule.registerQueue({
 			name: 'uploadQueue',
 		}),
 		CloudinaryModule,
 		ConfigModule,
+		LoggerModule,
 	],
 	controllers: [AttachmentController],
 	providers: [AttachmentService, AttachmentProcessor],
+	exports: [AttachmentService],
 })
 export class AttachmentModule {}

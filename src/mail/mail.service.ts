@@ -3,7 +3,7 @@ import { InjectQueue } from '@nestjs/bull';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Queue } from 'bull';
-import { User } from 'src/user/schema/user.schema';
+import { User } from 'src/user/user.entity';
 
 @Injectable()
 export class MailService {

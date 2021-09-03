@@ -3,8 +3,7 @@ import { OnQueueFailed, Process, Processor } from '@nestjs/bull';
 import { Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Job } from 'bull';
-import { AppModule } from 'src/app.module';
-import { User } from 'src/user/schema/user.schema';
+import { User } from 'src/user/user.entity';
 
 @Processor('mailQueue')
 export class MailProcessor {
@@ -45,11 +44,8 @@ export class MailProcessor {
 		job: Job<{ user: User; code: string }>,
 	): Promise<any> {
 		const { user, code } = job.data;
-		const url = AppModule.isDev
-			? this.configService.get('host') + '/api/auth/confirmation?code=' + code
-			: `${this.configService.get('host')}:${this.configService.get('post')}` +
-			  '/api/auth/confirmation?code=' +
-			  code;
+		const url =
+			this.configService.get('host') + '/api/auth/confirmation?code=' + code;
 		try {
 			await this.mailerService.sendMail({
 				to: user.email,
@@ -72,11 +68,8 @@ export class MailProcessor {
 	): Promise<any> {
 		const { user, code } = job.data;
 
-		const url = AppModule.isDev
-			? this.configService.get('host') + '/api/auth/reset?code=' + code
-			: `${this.configService.get('host')}:${this.configService.get('post')}` +
-			  '/api/auth/reset?code=' +
-			  code;
+		const url =
+			this.configService.get('host') + '/api/auth/reset-password?code=' + code;
 
 		try {
 			await this.mailerService.sendMail({

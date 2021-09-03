@@ -1,43 +1,68 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { InjectModel } from '@nestjs/mongoose';
+import { InjectRepository } from '@nestjs/typeorm';
+import { plainToClass } from 'class-transformer';
 import { randomBytes } from 'crypto';
 import * as moment from 'moment';
-import { Model } from 'mongoose';
-import { CachingService } from 'src/caching/caching.service';
-import { AbstractService } from 'src/common/abstract.service';
+import { BaseService } from 'src/common/base.service';
+import { LoggerService } from 'src/logger/logger.service';
+import { Repository } from 'typeorm';
 import { ConfirmationInputDTO } from '../dto/confirmation-input.dto';
-import { Confirmation, ConfirmationDocument } from './confirmation.schema';
+import { Confirmation, ConfirmationType } from './confirmation.entity';
 
 @Injectable()
-export class ConfirmationService extends AbstractService<ConfirmationDocument> {
+export class ConfirmationService extends BaseService<
+	Confirmation,
+	Repository<Confirmation>
+> {
 	constructor(
-		@InjectModel(Confirmation.name)
-		confirmationModel: Model<ConfirmationDocument>,
+		@InjectRepository(Confirmation) repository: Repository<Confirmation>,
+		logger: LoggerService,
 		private readonly configService: ConfigService,
 	) {
-		super(confirmationModel);
+		super(repository, logger);
 	}
 
 	async createConfirmationCode(payload: ConfirmationInputDTO): Promise<string> {
-		payload.expiredAt = moment()
-			.add(this.configService.get<number>('confirmation.ttl'), 's')
-			.toDate();
-		payload.code = randomBytes(16).toString('hex');
-		payload.type = 'CONFIRMATION';
-		const confirmation = await this.create(payload);
+		const confirmation = plainToClass(Confirmation, {
+			...payload,
+			expiredAt: moment()
+				.add(this.configService.get<number>('confirmation.ttl'), 's')
+				.toDate(),
+			code: randomBytes(16).toString('hex'),
+			type: ConfirmationType.emailConfirm,
+		});
+		await this.create(confirmation);
+		return confirmation.code;
+	}
+
+	async createForgetPasswordCode(
+		payload: ConfirmationInputDTO,
+	): Promise<string> {
+		const confirmation = plainToClass(Confirmation, {
+			...payload,
+			expiredAt: moment()
+				.add(this.configService.get<number>('confirmation.ttl'), 's')
+				.toDate(),
+			code: randomBytes(16).toString('hex'),
+			type: ConfirmationType.forgetPassword,
+		});
+		await this.create(confirmation);
 		return confirmation.code;
 	}
 
 	async createResetPasswordCode(
 		payload: ConfirmationInputDTO,
 	): Promise<string> {
-		payload.expiredAt = moment()
-			.add(this.configService.get<number>('confirmation.ttl'), 's')
-			.toDate();
-		payload.code = randomBytes(16).toString('hex');
-		payload.type = 'FORGET_PASSWORD';
-		const confirmation = await this.create(payload);
-		return confirmation.code;
+		const resetPasswordCode = plainToClass(Confirmation, {
+			...payload,
+			expiredAt: moment()
+				.add(this.configService.get<number>('confirmation.ttl'), 's')
+				.toDate(),
+			code: randomBytes(16).toString('hex'),
+			type: ConfirmationType.resetPassword,
+		});
+		await this.create(resetPasswordCode);
+		return resetPasswordCode.code;
 	}
 }

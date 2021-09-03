@@ -1,55 +1,33 @@
 import { BullModule } from '@nestjs/bull';
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { GraphQLModule } from '@nestjs/graphql';
-import { MongooseModule } from '@nestjs/mongoose';
 import { ScheduleModule } from '@nestjs/schedule';
 import { ServeStaticModule } from '@nestjs/serve-static';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { join } from 'path';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
+import { AppGateway } from './app.gateway';
 import { AttachmentModule } from './attachment/attachment.module';
 import { AuthModule } from './auth/auth.module';
 import { CachingModule } from './caching/caching.module';
+import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { AppLoggerMiddleware } from './common/middlewares/logger.middleware';
 import configuration from './config/configuration';
+import connectionOptions from './config/orm.config';
 import { LoggerModule } from './logger/logger.module';
 import { MailModule } from './mail/mail.module';
+import { PhotoModule } from './photo/photo.module';
+import { PostGateway } from './post/post.gateway';
 import { PostModule } from './post/post.module';
+import { ProfileModule } from './profile/profile.module';
 import { TaskService } from './task/task.service';
 import { UserModule } from './user/user.module';
-import { CloudinaryModule } from './cloudinary/cloudinary.module';
-
 @Module({
 	imports: [
 		ConfigModule.forRoot({
 			envFilePath: ['.env', '.prod.env'],
 			load: [configuration],
 		}),
-		GraphQLModule.forRootAsync({
-			imports: [ConfigModule],
-			inject: [ConfigService],
-			useFactory: async (configService: ConfigService) => ({
-				debug: false,
-				playground: true,
-				autoSchemaFile: 'schema.gql',
-				cors: {
-					origin: configService.get<string>('cors.origin'),
-					credentials: true,
-				},
-			}),
-		}),
-		MongooseModule.forRootAsync({
-			imports: [ConfigModule],
-			useFactory: async (configService: ConfigService) => ({
-				uri: configService.get<string>('database.uri'),
-				useNewUrlParser: true,
-				useFindAndModify: false,
-				useUnifiedTopology: true,
-				useCreateIndex: true,
-			}),
-			inject: [ConfigService],
-		}),
+		TypeOrmModule.forRoot(connectionOptions),
 		BullModule.forRootAsync({
 			imports: [ConfigModule],
 			useFactory: (configService: ConfigService) => ({
@@ -73,9 +51,10 @@ import { CloudinaryModule } from './cloudinary/cloudinary.module';
 		CachingModule,
 		AttachmentModule,
 		CloudinaryModule,
+		ProfileModule,
+		PhotoModule,
 	],
-	controllers: [AppController],
-	providers: [AppService, TaskService],
+	providers: [AppGateway, PostGateway, TaskService],
 })
 export class AppModule implements NestModule {
 	static isDev: boolean;
@@ -88,4 +67,3 @@ export class AppModule implements NestModule {
 		consumer.apply(AppLoggerMiddleware).forRoutes('*');
 	}
 }
-// export class AppModule {}
